@@ -18,9 +18,10 @@ public class ArticleController {
     ArticleRepository ar;
 
     @PostMapping("/add")
-    public String addArticle(@RequestBody Article article){
+    public Long addArticle(@RequestBody Article article){
       ar.save(article);
-       return "Raboti";
+
+       return article.getId();
     }
     @GetMapping("/getAll")
     public List<Article> getAllArticles(){
