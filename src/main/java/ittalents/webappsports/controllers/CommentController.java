@@ -1,5 +1,6 @@
 package ittalents.webappsports.controllers;
 
+import ittalents.webappsports.exceptions.UserException;
 import ittalents.webappsports.models.Comment;
 import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.CommentRepository;
@@ -7,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.nio.file.NoSuchFileException;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-public class CommentController {
+public class CommentController extends SportalController{
 
     @Autowired
     CommentRepository commentRepository;
@@ -47,7 +49,8 @@ public class CommentController {
 
 
     @PostMapping("/comment/add")
-    public String addComment(@RequestBody Comment comment){
+    public String addComment(@RequestBody Comment comment, HttpSession session) throws UserException {
+        validateUser(session);
         commentRepository.save(comment);
         return "comment saved";
     }
