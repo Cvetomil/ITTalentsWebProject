@@ -1,11 +1,9 @@
 package ittalents.webappsports.repositories;
 
-import ittalents.webappsports.models.Comment;
+import ittalents.webappsports.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface CommentRepository extends JpaRepository<Comment,Long> {
+public interface UserRepository extends JpaRepository<User,Long> {
 }
