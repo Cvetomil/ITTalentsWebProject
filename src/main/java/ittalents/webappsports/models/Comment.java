@@ -16,10 +16,10 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long art_id;
-    private long user_id;
+    private long artId;
+    private long userId;
     private String text;
-    private LocalDateTime publish_time;
+    private LocalDateTime publish_time = LocalDateTime.now();
     private int likes;
     private int dislikes;
 

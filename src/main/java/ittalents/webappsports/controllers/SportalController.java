@@ -3,10 +3,8 @@ package ittalents.webappsports.controllers;
 import ittalents.webappsports.exceptions.NotAdminException;
 import ittalents.webappsports.exceptions.UserNotLoggedException;
 import ittalents.webappsports.models.User;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.NodeType;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 

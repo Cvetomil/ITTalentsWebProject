@@ -17,12 +17,11 @@ public class ArticleController extends SportalController{
     @Autowired
     ArticleRepository ar;
 
-    @PostMapping("/add")
-    public Long addArticle(@RequestBody Article article){
+    @PostMapping("/addArticle")
+    public void addArticle(@RequestBody Article article){
       ar.save(article);
+          }
 
-       return article.getId();
-    }
     @GetMapping("/getAll")
     public List<Article> getAllArticles(){
 
@@ -30,17 +29,19 @@ public class ArticleController extends SportalController{
     }
 
     @GetMapping("/{id}")
-    public Article getArticleById(@PathVariable long id ) throws Exception{
+    public Article getArticleById(@PathVariable long id ) {
 
-        if (ar.existsById(id)) {
-            return ar.findById(id).get();
-        }
-throw new NoSuchFieldException();
+        Article a = ar.findById(id).get();
+        a.setReadCount(a.getReadCount() +1);
+        ar.save(a);
+                return a;
+           }
+
+    @GetMapping("/category/{id}")
+    public List<Article> getArticlesByCatId(@PathVariable long id ) {
+        return ar.getAllByCatId(id);
     }
 
-    @ExceptionHandler(Exception.class)
-    public String exceptionHandler (){
-        return "Hendulnahme exceptiona";
-    }
+
 
 }
