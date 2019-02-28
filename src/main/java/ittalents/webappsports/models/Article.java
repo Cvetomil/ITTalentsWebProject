@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -21,6 +22,7 @@ public class Article {
         private long catId;
     private String title;
     private String text;
+    private LocalDate dateAdded = LocalDate.now();
     private int readCount;
     private int dayReads;
     @OneToMany(mappedBy = "artId")

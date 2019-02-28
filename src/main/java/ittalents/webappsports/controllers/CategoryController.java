@@ -17,7 +17,7 @@ public class CategoryController {
     @Autowired
     CategoryRepository cr;
 
-    @GetMapping("/cat/{id}")
+    @GetMapping("/categories/{id}")
 public Category getCategory (@PathVariable long id){
     return cr.findById(id).get();
 }
