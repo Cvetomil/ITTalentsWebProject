@@ -50,7 +50,7 @@ public class CommentController extends SportalController{
 
     @PostMapping("/comment/add")
     public String addComment(@RequestBody Comment comment, HttpSession session) throws UserException {
-        validateUser(session);
+        //validateUser(session);
         commentRepository.save(comment);
         return "comment saved";
     }
