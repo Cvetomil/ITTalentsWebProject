@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.mail.MessagingException;
 import java.sql.SQLException;
 
 @ControllerAdvice
@@ -36,6 +37,10 @@ public class SportalController {
     @ExceptionHandler({SQLException.class})
     public String handleSql(){
         return "something went wrong";
+    }
+    @ExceptionHandler({MessagingException.class})
+    public String handleEmailException(){
+        return "Something went wrong with the mail service";
     }
 
 

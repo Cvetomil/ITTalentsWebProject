@@ -1,4 +1,4 @@
-package ittalents.webappsports.controllers;
+package ittalents.webappsports.util;
 
 import ittalents.webappsports.exceptions.NotAdminException;
 import ittalents.webappsports.exceptions.UserNotLoggedException;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 
-@RestController
+
 public class userAuthorities {
     protected void validateUser(HttpSession session) throws UserNotLoggedException {
         if(session.getAttribute("Logged") == null){

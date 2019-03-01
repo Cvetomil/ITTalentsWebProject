@@ -2,14 +2,15 @@ package ittalents.webappsports.controllers;
 
 
 import ittalents.webappsports.exceptions.*;
+import ittalents.webappsports.util.EmailSender;
 import ittalents.webappsports.models.User;
 import ittalents.webappsports.repositories.UserRepository;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 
 
@@ -25,10 +26,11 @@ public class UserController extends SportalController{
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @PostMapping("/register")
-    public void registerUser(@RequestBody User user) throws UserException {
-        EmailOrUsernameExist(user.getEmail(),user.getUsername());
+    public void registerUser(@RequestBody User user) throws UserException, MessagingException {
+        EmailOrUsernameExist(user.getEmail(), user.getUsername());
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
+        EmailSender.sendEmail(user.getEmail(), "Congrats " + user.getUsername() + ", you have been registered!");
     }
 
     public void EmailOrUsernameExist(String email,String username) throws UserException{
