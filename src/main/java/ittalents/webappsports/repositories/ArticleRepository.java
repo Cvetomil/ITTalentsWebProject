@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 
-List<Article> getAllByCatId (long id);
+List<Article> findAllByTitleContaining (String title);
 
 }

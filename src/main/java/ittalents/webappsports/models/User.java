@@ -1,12 +1,12 @@
 package ittalents.webappsports.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,6 +23,9 @@ public class User {
     private String password;
     @Column(unique = true, length = 256)
     private String email;
+
+    @OneToMany(mappedBy = "userId")
+    private List<Comment> comments;
 
     @Override
     public String toString() {

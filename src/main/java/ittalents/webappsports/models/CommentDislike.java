@@ -1,23 +1,30 @@
 package ittalents.webappsports.models;
 
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
 @Table(name = "dislikes")
+@Entity
 public class CommentDislike {
 
+    @Embeddable
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @EqualsAndHashCode
+    static public class CommentDislikeId implements Serializable{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long userId;
-    private long commentId;
+        private long userId;
+        private long commentId;
+
+    }
+
+    @EmbeddedId
+    private CommentDislikeId id;
 
 }

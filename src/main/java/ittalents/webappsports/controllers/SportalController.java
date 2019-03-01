@@ -1,12 +1,11 @@
 package ittalents.webappsports.controllers;
 
 import ittalents.webappsports.exceptions.*;
-import ittalents.webappsports.models.User;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 
 @ControllerAdvice
@@ -30,6 +29,7 @@ public class SportalController {
         return "User with that username already exist";
     }
     @ExceptionHandler({WrongCredentialsException.class})
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public String wrongUsernameOrPassword(){
         return "Wrong username or password";
     }
@@ -38,5 +38,11 @@ public class SportalController {
         return "something went wrong";
     }
 
+
+    @ExceptionHandler({NotFoundException.class})
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public String handleNotFoundException(Exception e){
+        return e.getMessage();
+    }
 
 }
