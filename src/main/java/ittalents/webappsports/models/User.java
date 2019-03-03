@@ -19,7 +19,6 @@ public class User {
     private long roleId = 2;
     @Column(unique = true, length = 256)
     private String username;
-    //@JsonIgnore
     private String password;
     @Column(unique = true, length = 256)
     private String email;

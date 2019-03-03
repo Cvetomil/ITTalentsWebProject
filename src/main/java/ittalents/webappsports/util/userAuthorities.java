@@ -9,12 +9,12 @@ import javax.servlet.http.HttpSession;
 
 
 public class userAuthorities {
-    protected void validateUser(HttpSession session) throws UserNotLoggedException {
+    public static void validateUser(HttpSession session) throws UserNotLoggedException {
         if(session.getAttribute("Logged") == null){
             throw new UserNotLoggedException();
         }
     }
-    protected void validateAdmin(HttpSession session) throws UserNotLoggedException, NotAdminException {
+    public static void validateAdmin(HttpSession session) throws UserNotLoggedException, NotAdminException {
         if(session.getAttribute("Logged") == null){
             throw new UserNotLoggedException();
         }
@@ -26,7 +26,7 @@ public class userAuthorities {
         }
     }
 
-    private boolean isAdmin(User user){
+    public static boolean isAdmin(User user){
         if(user.getRoleId() == 2){
             return false;
         }
