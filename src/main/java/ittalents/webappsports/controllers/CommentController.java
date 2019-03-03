@@ -1,15 +1,14 @@
 package ittalents.webappsports.controllers;
 
-import ittalents.webappsports.exceptions.UserException;
+import ittalents.webappsports.exceptions.TeaPotException;
+import ittalents.webappsports.exceptions.UserNotLoggedException;
 import ittalents.webappsports.models.Comment;
-import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.nio.file.NoSuchFileException;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,12 +46,67 @@ public class CommentController extends SportalController{
     }
 
 
+//adding a comment
+    @PostMapping("/articles/{id}/addcomment")
+    public void addComment(@RequestBody String text, HttpSession session, @PathVariable long id) throws UserNotLoggedException {
+       if (session.getAttribute("Logged") == null){
+           throw new UserNotLoggedException() ;
+       } else {
+           Comment comment = new Comment();
+           comment.setArtId(id);
+           comment.setUserId((long) session.getAttribute( "userId"));
+           comment.setText(text);
+           commentRepository.save(comment);
+       }
 
-    @PostMapping("/comment/add")
-    public String addComment(@RequestBody Comment comment, HttpSession session) throws UserException {
-        //validateUser(session);
+    }
+
+    //delete a comment
+        @PutMapping("/articles/{id}/deletecomment{commentId}")
+    public void deleteComment (HttpSession session, @PathVariable long id, @PathVariable long commentId) throws TeaPotException, UserNotLoggedException{
+        if (session.getAttribute("Logged") == null) {
+            throw new UserNotLoggedException();
+        }
+        Comment comment = commentRepository.getOne(commentId);
+        if (comment.getArtId() != id){
+            throw new TeaPotException("Don't do this!");
+                    }
+                commentRepository.delete(comment);
+    }
+
+    //editing a comment
+    @PutMapping("/articles/{id}/editcomment{commentId}")
+    public void editComment (HttpSession session,@RequestBody String text, @PathVariable long id, @PathVariable long commentId) throws TeaPotException, UserNotLoggedException{
+        if (session.getAttribute("Logged") == null) {
+            throw new UserNotLoggedException();
+        }
+
+        Comment comment = commentRepository.getOne(commentId);
+        if (comment.getArtId() != id){
+            throw new TeaPotException("Don't do this!");
+        }
+
+        comment.setEdited(true);
+        comment.setLastEdited(LocalDateTime.now());
+        comment.setText(text);
         commentRepository.save(comment);
-        return "comment saved";
+    }
+
+    //delete all comments for a user
+    @PutMapping("/users/deleteallcomments")
+    public void deleteAllComments (HttpSession session) throws UserNotLoggedException{
+
+
+        if (session.getAttribute("Logged") == null) {
+            throw new UserNotLoggedException();
+        }
+        
+               String userId = String.valueOf((long) session.getAttribute("userId"));
+        StringBuilder sql = new StringBuilder();
+        sql.append("DELETE FROM comments WHERE user_id = ");
+        sql.append(userId);
+
+        jdbcTemplate.execute(sql.toString());
     }
 
     @ExceptionHandler(NoSuchFieldException.class)

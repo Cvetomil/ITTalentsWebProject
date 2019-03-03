@@ -21,14 +21,15 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private long artId;
-
+private boolean isEdited = false;
     private long userId;
     private String text;
-    private LocalDateTime publish_time = LocalDateTime.now();
-  @OneToMany
+    private LocalDateTime publishTime = LocalDateTime.now();
+    private LocalDateTime lastEdited;
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "commentId")
   private List<CommentLike> likes;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "commentId")
        private List<CommentDislike> dislikes;
 

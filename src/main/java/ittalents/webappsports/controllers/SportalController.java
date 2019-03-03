@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.mail.MessagingException;
-import java.sql.SQLException;
 
 @ControllerAdvice
 public class SportalController {
@@ -34,11 +33,7 @@ public class SportalController {
     public String wrongUsernameOrPassword(){
         return "Wrong username or password";
     }
-    @ExceptionHandler({SQLException.class})
-    public String handleSql(){
-        return "something went wrong";
-    }
-    @ExceptionHandler({MessagingException.class})
+        @ExceptionHandler({MessagingException.class})
     public String handleEmailException(){
         return "Something went wrong with the mail service";
     }
@@ -50,4 +45,9 @@ public class SportalController {
         return e.getMessage();
     }
 
+    @ExceptionHandler(TeaPotException.class)
+    @ResponseStatus(value = HttpStatus.I_AM_A_TEAPOT)
+    public String handleTeaPotException (Exception e){
+        return e.getMessage();
+    }
 }

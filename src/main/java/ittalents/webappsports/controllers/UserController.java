@@ -2,22 +2,22 @@ package ittalents.webappsports.controllers;
 
 
 import ittalents.webappsports.dto.UserDTO;
-import ittalents.webappsports.exceptions.*;
-import ittalents.webappsports.util.EmailSender;
+import ittalents.webappsports.exceptions.EmailAlreadyExist;
+import ittalents.webappsports.exceptions.UserException;
+import ittalents.webappsports.exceptions.UsernameAlreadyExist;
+import ittalents.webappsports.exceptions.WrongCredentialsException;
 import ittalents.webappsports.models.User;
 import ittalents.webappsports.repositories.UserRepository;
+import ittalents.webappsports.util.EmailSender;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -67,15 +67,18 @@ public class UserController extends SportalController{
         if(userToJson == null){
             throw new WrongCredentialsException();
         }
-        else{
+
             if(encoder.matches(user.getPassword(),userToJson.getPassword())) {
+
                 session.setAttribute("Logged", userToJson);
+                session.setAttribute("Logged", user);
+                session.setAttribute("userId", userToJson.getId());
                 return new UserDTO().convertToDTO(userToJson);
-            }
-            else {
-                throw new WrongCredentialsException();
-            }
-        }
+                           }
+
+
+            throw new WrongCredentialsException();
+
     }
     @PostMapping("/logout")
     public void logout(HttpSession session){
