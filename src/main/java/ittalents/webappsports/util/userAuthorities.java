@@ -3,7 +3,6 @@ package ittalents.webappsports.util;
 import ittalents.webappsports.exceptions.NotAdminException;
 import ittalents.webappsports.exceptions.UserNotLoggedException;
 import ittalents.webappsports.models.User;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 
@@ -27,9 +26,9 @@ public class userAuthorities {
     }
 
     public static boolean isAdmin(User user){
-        if(user.getRoleId() == 2){
-            return false;
+        if(user.getRoleId() == 0){
+            return true;
         }
-        return true;
+        return false;
     }
 }

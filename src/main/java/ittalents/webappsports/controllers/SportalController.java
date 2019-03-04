@@ -50,4 +50,9 @@ public class SportalController {
     public String handleTeaPotException (Exception e){
         return e.getMessage();
     }
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public String handleBadRequestsExceptions (Exception e){
+        return "Bad request!";
+    }
 }

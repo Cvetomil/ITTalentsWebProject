@@ -27,6 +27,7 @@ public class Article {
     private int dayReads;
     @OneToMany(mappedBy = "artId")
     private List<Comment> comments;
-
+    @OneToMany(mappedBy = "artId", cascade = CascadeType.ALL)
+private List<Picture> pictures;
 
 }

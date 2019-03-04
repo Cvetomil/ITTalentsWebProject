@@ -26,12 +26,11 @@ private boolean isEdited = false;
     private String text;
     private LocalDateTime publishTime = LocalDateTime.now();
     private LocalDateTime lastEdited;
-  @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "commentId")
-  private List<CommentLike> likes;
+   private List<CommentLike> likes;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "commentId")
-       private List<CommentDislike> dislikes;
-
+         private List<CommentDislike> dislikes;
 
 }

@@ -22,7 +22,7 @@ public class CommentLike {
 
         private long userId;
         @JsonIgnore
-        private long commentId;
+                private long commentId;
 
     }
 

@@ -71,8 +71,8 @@ public class UserController extends SportalController{
             if(encoder.matches(user.getPassword(),userToJson.getPassword())) {
 
                 session.setAttribute("Logged", userToJson);
-                session.setAttribute("Logged", user);
-                session.setAttribute("userId", userToJson.getId());
+                                session.setAttribute("userId", userToJson.getId());
+                                session.setAttribute("roleId", userToJson.getRoleId());
                 return new UserDTO().convertToDTO(userToJson);
                            }
 
