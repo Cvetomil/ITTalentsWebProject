@@ -1,0 +1,29 @@
+2019-03-05-http-nio-8080-exec-2--ERROR-ittalents.webappsports.controllers.SportalController:email exist exception
+2019-03-05-http-nio-8080-exec-5--ERROR-ittalents.webappsports.controllers.SportalController:User not logged exception
+2019-03-05-http-nio-8080-exec-6--ERROR-ittalents.webappsports.controllers.SportalController:wrong username or password exception
+2019-03-05-http-nio-8080-exec-8--ERROR-ittalents.webappsports.controllers.SportalController:wrong username or password exception
+2019-03-05-http-nio-8080-exec-10--ERROR-ittalents.webappsports.controllers.SportalController:same username exception
+2019-03-05-http-nio-8080-exec-1--INFO -ittalents.webappsports.controllers.UserController:user registered
+2019-03-05-http-nio-8080-exec-4--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-7--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-9--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-4--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-5--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-7--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-9--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-2--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-2--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-1--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-1--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-1--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-1--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-1--ERROR-ittalents.webappsports.controllers.SportalController:User not logged exception
+2019-03-05-http-nio-8080-exec-1--ERROR-ittalents.webappsports.controllers.SportalController:User not logged exception
+2019-03-05-http-nio-8080-exec-4--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-2--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-3--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-6--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-1--ERROR-ittalents.webappsports.controllers.SportalController:Bad request exception
+2019-03-05-http-nio-8080-exec-2--ERROR-ittalents.webappsports.controllers.SportalController:User not logged exception
+2019-03-05-http-nio-8080-exec-2--ERROR-ittalents.webappsports.controllers.SportalController:User not logged exception
+2019-03-05-http-nio-8080-exec-4--ERROR-ittalents.webappsports.controllers.SportalController:User not logged exception

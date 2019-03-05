@@ -2,13 +2,11 @@ package ittalents.webappsports.controllers;
 
 
 import ittalents.webappsports.dto.UserDTO;
-import ittalents.webappsports.exceptions.EmailAlreadyExist;
-import ittalents.webappsports.exceptions.UserException;
-import ittalents.webappsports.exceptions.UsernameAlreadyExist;
-import ittalents.webappsports.exceptions.WrongCredentialsException;
+import ittalents.webappsports.exceptions.*;
 import ittalents.webappsports.models.User;
 import ittalents.webappsports.repositories.UserRepository;
 import ittalents.webappsports.util.EmailSender;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,6 +19,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Optional;
 
 import static ittalents.webappsports.util.userAuthorities.validateUser;
 
@@ -36,29 +35,37 @@ public class UserController extends SportalController{
 
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
+    static Logger log = Logger.getLogger(UserController.class.getName());
+
+
     @PostMapping("/register")
-    public void registerUser(@RequestBody User user) throws UserException, MessagingException {
+    public UserDTO registerUser(@RequestBody User user) throws UserException, MessagingException {
         emailExist(user.getEmail());
         usernameExist(user.getUsername());
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
-        EmailSender.sendEmail(user.getEmail(),"registration", "Congrats " + user.getUsername() + ", you have been registered!");
+
+        new Thread(() -> {
+            try {
+                EmailSender.sendEmail(user.getEmail(),"registration","You have been registered");
+            } catch (MessagingException e) {
+                System.out.println("Something went wrong with the mail service");
+            }
+        }).start();
+        log.info("user registered");
+        return new UserDTO().convertToDTO(user);
+
     }
 
     private void emailExist(String email) throws EmailAlreadyExist {
-        String sqlEmail = "SELECT count(*) FROM users WHERE email = ?";
-        int countEmails = jdbcTemplate.queryForObject(sqlEmail, new Object[] { email }, Integer.class);
-
-        if(countEmails > 0){ //if user with the same email exists in database
+        User user = userRepository.getByEmail(email);
+        if(user != null){
             throw new EmailAlreadyExist();
         }
     }
     private void usernameExist(String username) throws UsernameAlreadyExist {
-
-        String sqlUsername = "SELECT count(*) FROM users WHERE username = ?";
-        int countUsernames = jdbcTemplate.queryForObject(sqlUsername, new Object[] { username }, Integer.class);
-
-        if(countUsernames > 0){ //if user with the same username exists
+        User user = userRepository.getByUsername(username);
+        if(user != null){
             throw new UsernameAlreadyExist();
         }
     }
@@ -78,32 +85,34 @@ public class UserController extends SportalController{
             }
             throw new WrongCredentialsException();
         }
-
-
     }
     @PostMapping("/logout")
     public void logout(HttpSession session){
-        session.setAttribute("Logged", null);
+        session.invalidate();
     }
     @PutMapping("/user/edit/password")
-    public void changePassword(@RequestBody User user, HttpSession session) throws UserException, SQLException {
-        validateUser(session);
-        PreparedStatement ps = jdbcTemplate.getDataSource().getConnection().prepareStatement("UPDATE users SET password = ? WHERE id = ?");
-        ps.setString(1, encoder.encode(user.getPassword()));
-        User sameLoggedUser = (User)session.getAttribute("Logged");
-        ps.setLong(2,sameLoggedUser.getId());
-        ps.executeUpdate();
+    public UserDTO changePassword(@RequestBody User user, HttpSession session) throws UserException, SQLException,NotFoundException {
+        User userFromDB = getUserFromSession(session);
+        userFromDB.setPassword(encoder.encode(user.getPassword()));
+        userRepository.save(userFromDB);
+        return new UserDTO().convertToDTO(user);
     }
     @PutMapping("/user/edit/username")
-    public void changeUsername(@RequestBody User user, HttpSession session) throws UserException, SQLException {
-        validateUser(session);
-        PreparedStatement ps = jdbcTemplate.getDataSource().getConnection().prepareStatement("UPDATE users SET username = ? WHERE id = ?");
-        ps.setString(1, user.getUsername());
-        User sameLoggedUser = (User)session.getAttribute("Logged");
-        ps.setLong(2,sameLoggedUser.getId());
-        ps.executeUpdate();
+    public User changeUsername(@RequestBody User user, HttpSession session) throws UserException, NotFoundException {
+        User userFromDB = getUserFromSession(session);
+        userFromDB.setUsername(user.getUsername());
+        userRepository.save(userFromDB);
+        return user;
     }
-
+    private User getUserFromSession(HttpSession session) throws UserNotLoggedException, NotFoundException {
+        validateUser(session);
+        long userId = (long)session.getAttribute("userId");
+        Optional<User> u = userRepository.findById(userId);
+        if(!u.isPresent()){
+            throw new NotFoundException("User not found");
+        }
+        return u.get();
+    }
 
 
 }

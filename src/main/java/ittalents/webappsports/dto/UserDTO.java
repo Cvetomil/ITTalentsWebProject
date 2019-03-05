@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @NoArgsConstructor
@@ -18,6 +20,10 @@ public class UserDTO {
     private long roleId;
     private String username;
     private String email;
+    private int age;
+    private enum Gender{
+        MALE,FEMALE
+    }
     private List<Comment> comments;
 
     public UserDTO convertToDTO(User user){
@@ -29,5 +35,4 @@ public class UserDTO {
 
         return this;
     }
-
 }
