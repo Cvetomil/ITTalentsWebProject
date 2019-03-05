@@ -1,10 +1,12 @@
 package ittalents.webappsports.controllers;
 
+import ittalents.webappsports.exceptions.BadRequestException;
 import ittalents.webappsports.exceptions.NotAdminException;
 import ittalents.webappsports.exceptions.NotFoundException;
 import ittalents.webappsports.exceptions.UserNotLoggedException;
 import ittalents.webappsports.models.Article;
 import ittalents.webappsports.models.Category;
+import ittalents.webappsports.models.User;
 import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.CategoryRepository;
 import ittalents.webappsports.util.userAuthorities;
@@ -28,14 +30,7 @@ public class ArticleController extends SportalController {
     @Autowired
     CategoryRepository cr;
 
-    @PostMapping("/users/addArticle")
-
-    public void addArticle(@RequestBody Article article, HttpSession session) throws NotAdminException, UserNotLoggedException {
-        userAuthorities.validateAdmin(session);
-        ar.save(article);
-    }
-
-
+    //Request article
     @GetMapping("/articles/{id}")
     public Article getArticleById(@PathVariable long id) throws NotFoundException {
         Optional<Article> a = ar.findById(id);
@@ -48,6 +43,23 @@ public class ArticleController extends SportalController {
             ar.save(article);
             return article;
         }
+    }
+
+    //Add new article
+    @PostMapping("/users/addArticle")
+    public void addArticle(@RequestBody Article article, HttpSession session)
+            throws NotAdminException, UserNotLoggedException, BadRequestException {
+
+        userAuthorities.validateAdmin(session);
+        if (!cr.findById(article.getCatId()).isPresent()) {
+            throw new BadRequestException("The category does not exist!");
+        }
+        if (ar.findByTitle(article.getTitle()) != null) {
+            throw new BadRequestException("An article with this title already exists!");
+        }
+        User user = (User)session.getAttribute("Logged");
+        article.setAuthor(user.getUsername());
+        ar.save(article);
     }
 
     @GetMapping("/search/{title}")
@@ -74,8 +86,8 @@ public class ArticleController extends SportalController {
             Article article = ar.findById(id).get();
             list.add(article);
         });
-       // List<Article> list = ar.findAll();
-       // list.sort(Comparator.comparing(Article::getDayReads).reversed());
+        // List<Article> list = ar.findAll();
+        // list.sort(Comparator.comparing(Article::getDayReads).reversed());
         return list;
     }
 

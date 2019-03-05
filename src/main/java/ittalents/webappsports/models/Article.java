@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -25,6 +26,9 @@ public class Article {
     private LocalDate dateAdded = LocalDate.now();
     private int readCount;
     private int dayReads;
+    private String author;
+    private boolean isEdited = false;
+    private LocalDateTime lastEdited;
     @OneToMany(mappedBy = "artId")
     private List<Comment> comments;
     @OneToMany(mappedBy = "artId", cascade = CascadeType.ALL)

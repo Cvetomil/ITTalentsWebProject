@@ -11,5 +11,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     List<Article> findAllByTitleContaining(String title);
 
-List<Article> queryAllByDayReads(int num);
+    Article findByTitle(String title);
+
 }
