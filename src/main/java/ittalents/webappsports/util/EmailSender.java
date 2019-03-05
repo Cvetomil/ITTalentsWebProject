@@ -13,7 +13,7 @@ public class EmailSender {
     private static final String password = "sportal123";
 
 
-    public static void sendEmail(String emailReceiver, String text) throws  MessagingException {
+    public static void sendEmail(String emailReceiver, String subject, String text) throws  MessagingException {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
@@ -29,7 +29,7 @@ public class EmailSender {
         msg.setFrom(new InternetAddress("noreply@sportal.bg", false));
 
         msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailReceiver));
-        msg.setSubject("testing mail");
+        msg.setSubject(subject);
         msg.setContent(text, "text/html");
         msg.setSentDate(new Date());
 

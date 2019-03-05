@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,7 +42,7 @@ public class UserController extends SportalController{
         usernameExist(user.getUsername());
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
-        EmailSender.sendEmail(user.getEmail(), "Congrats " + user.getUsername() + ", you have been registered!");
+        EmailSender.sendEmail(user.getEmail(),"registration", "Congrats " + user.getUsername() + ", you have been registered!");
     }
 
     private void emailExist(String email) throws EmailAlreadyExist {
@@ -67,24 +68,24 @@ public class UserController extends SportalController{
         if(userToJson == null){
             throw new WrongCredentialsException();
         }
-
-            if(encoder.matches(user.getPassword(),userToJson.getPassword())) {
+        else {
+            if (encoder.matches(user.getPassword(), userToJson.getPassword())) {
 
                 session.setAttribute("Logged", userToJson);
-                                session.setAttribute("userId", userToJson.getId());
-                                session.setAttribute("roleId", userToJson.getRoleId());
+                session.setAttribute("userId", userToJson.getId());
+                session.setAttribute("roleId", userToJson.getRoleId());
                 return new UserDTO().convertToDTO(userToJson);
-                           }
-
-
+            }
             throw new WrongCredentialsException();
+        }
+
 
     }
     @PostMapping("/logout")
     public void logout(HttpSession session){
         session.setAttribute("Logged", null);
     }
-    @PostMapping("/user/edit/password")
+    @PutMapping("/user/edit/password")
     public void changePassword(@RequestBody User user, HttpSession session) throws UserException, SQLException {
         validateUser(session);
         PreparedStatement ps = jdbcTemplate.getDataSource().getConnection().prepareStatement("UPDATE users SET password = ? WHERE id = ?");
@@ -93,7 +94,7 @@ public class UserController extends SportalController{
         ps.setLong(2,sameLoggedUser.getId());
         ps.executeUpdate();
     }
-    @PostMapping("/user/edit/username")
+    @PutMapping("/user/edit/username")
     public void changeUsername(@RequestBody User user, HttpSession session) throws UserException, SQLException {
         validateUser(session);
         PreparedStatement ps = jdbcTemplate.getDataSource().getConnection().prepareStatement("UPDATE users SET username = ? WHERE id = ?");
