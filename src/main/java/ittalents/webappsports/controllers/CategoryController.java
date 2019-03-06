@@ -20,6 +20,7 @@ public class CategoryController {
     @Autowired
     CategoryRepository cr;
 
+    //get category from database
     @GetMapping("/categories/{id}")
     public Category getCategory(@PathVariable long id) throws BadRequestException {
         if (!cr.findById(id).isPresent()) {
@@ -28,6 +29,7 @@ public class CategoryController {
         return cr.findById(id).get();
     }
 
+    //gets all categories by title
     @GetMapping("/categories/search/{title}")
     public List<Category> findByName(@PathVariable String title) {
         return cr.getAllByNameContaining(title);

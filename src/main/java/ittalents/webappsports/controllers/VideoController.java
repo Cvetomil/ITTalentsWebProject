@@ -26,6 +26,7 @@ public class VideoController extends SportalController{
 
     private static final String VIDEO_DIR = "D:\\videos\\";
 
+    //upload video to database and save to hard drive
     @PostMapping("/videos/upload/{artId}")
     public void uploadVideo(@RequestParam("video") MultipartFile file,@PathVariable long artId, HttpSession session) throws UserException, IOException {
         userAuthorities.validateAdmin(session);
@@ -43,6 +44,8 @@ public class VideoController extends SportalController{
         FileOutputStream fos = new FileOutputStream(newImage);
         fos.write(bytes);
     }
+
+    //delete a video from database and from hard drive
     @DeleteMapping("/videos/delete/{id}")
     public Video deleteVideo(@PathVariable("id") long id, HttpSession session) throws UserException, NotFoundException, MediaException {
         userAuthorities.validateAdmin(session);
@@ -57,6 +60,8 @@ public class VideoController extends SportalController{
         }
         throw new MediaException("Video could not be deleted");
     }
+
+    //download video
     @GetMapping(value = "/videos/{id}", produces = "video/mp4")
     public byte[] downloadVideo(@PathVariable("id") long id) throws NotFoundException, IOException {
         Video videoFromDB = getVideoFromDB(id);

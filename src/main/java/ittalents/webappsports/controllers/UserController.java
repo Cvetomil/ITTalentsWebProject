@@ -33,7 +33,7 @@ public class UserController extends SportalController{
 
     static Logger log = Logger.getLogger(UserController.class.getName());
 
-
+    //register a user
     @PostMapping("/register")
     public UserDTO registerUser(@RequestBody User user) throws UserException {
         emailExist(user.getEmail());
@@ -51,18 +51,22 @@ public class UserController extends SportalController{
         return new UserDTO().convertToDTO(user);
     }
 
+    // checks if email exist in database
     private void emailExist(String email) throws EmailAlreadyExist {
         User user = userRepository.getByEmail(email);
         if(user != null){
             throw new EmailAlreadyExist("email already exist");
         }
     }
+    // checks if username exist in database
     private void usernameExist(String username) throws UsernameAlreadyExist {
         User user = userRepository.getByUsername(username);
         if(user != null){
             throw new UsernameAlreadyExist("username already exist");
         }
     }
+
+    //login
     @PostMapping("/login")
     public UserDTO login(@RequestBody User user, HttpSession session) throws UserException{
         User userToJson = userRepository.getByUsername(user.getUsername());
@@ -80,10 +84,14 @@ public class UserController extends SportalController{
             throw new WrongCredentialsException("wrong username or password");
         }
     }
+
+    //logout from session
     @PostMapping("/logout")
     public void logout(HttpSession session){
         session.invalidate();
     }
+
+    //edit password on logged user
     @PutMapping("/user/edit/password")
     public UserDTO changePassword(@RequestBody User user, HttpSession session) throws UserException, SQLException,NotFoundException {
         User userFromDB = getUserFromSession(session);
@@ -91,6 +99,7 @@ public class UserController extends SportalController{
         userRepository.save(userFromDB);
         return new UserDTO().convertToDTO(user);
     }
+    //edit username on logged user
     @PutMapping("/user/edit/username")
     public User changeUsername(@RequestBody User user, HttpSession session) throws UserException, NotFoundException {
         User userFromDB = getUserFromSession(session);

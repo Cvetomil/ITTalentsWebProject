@@ -27,6 +27,7 @@ public class ImageController {
 
     public static final String IMAGE_DIR = "C:\\Users\\aleks\\Pictures\\Upload\\";
 
+    //upload image to database and save to hard drive
     @PostMapping("/images/upload/{artId}")
     public void uploadImage(@RequestBody ImageUploadDTO dto, @PathVariable long artId, HttpSession session) throws IOException, UserNotLoggedException, NotAdminException {
 
@@ -48,12 +49,16 @@ public class ImageController {
         FileOutputStream fos = new FileOutputStream(newImage);
         fos.write(bytes);
     }
+
+    //download image
     @GetMapping(value="/images/{name}", produces = "image/png")
     public byte[] downloadImage(@PathVariable("name") String imageName) throws IOException {
         File newImage = new File(IMAGE_DIR +imageName);
         FileInputStream fis = new FileInputStream(newImage);
         return fis.readAllBytes();
     }
+
+    //delete picture from database and from hard drive
     @DeleteMapping("/image/{id}")
     public Picture deletePicture(@PathVariable("id") long id, HttpSession session) throws UserException,NotFoundException,MediaException {
         userAuthorities.validateAdmin(session);
