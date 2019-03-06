@@ -1,0 +1,2 @@
+2019-03-06 -ittalents.webappsports.controllers.SportalController :User not logged exception
+35handleUserException
