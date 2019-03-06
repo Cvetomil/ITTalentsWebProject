@@ -21,9 +21,6 @@ public class UserDTO {
     private String username;
     private String email;
     private int age;
-    private enum Gender{
-        MALE,FEMALE
-    }
     private List<Comment> comments;
 
     public UserDTO convertToDTO(User user){
@@ -32,7 +29,7 @@ public class UserDTO {
         this.username = user.getUsername();
         this.email = user.getEmail();
         this.comments = user.getComments();
-
+        this.age = user.getAge();
         return this;
     }
 }
