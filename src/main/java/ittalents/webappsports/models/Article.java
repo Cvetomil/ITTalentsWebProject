@@ -29,7 +29,7 @@ public class Article {
     private String author;
     private boolean isEdited = false;
     private LocalDateTime lastEdited;
-    @OneToMany(mappedBy = "artId")
+    @OneToMany(mappedBy = "artId", cascade = CascadeType.ALL)
     private List<Comment> comments;
     @OneToMany(mappedBy = "artId", cascade = CascadeType.ALL)
 private List<Picture> pictures;

@@ -1,5 +1,6 @@
 package ittalents.webappsports.controllers;
 
+import ittalents.webappsports.dao.ArticleDAO;
 import ittalents.webappsports.dto.EditedArticleDTO;
 import ittalents.webappsports.exceptions.BadRequestException;
 import ittalents.webappsports.exceptions.NotAdminException;
@@ -11,20 +12,21 @@ import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.CategoryRepository;
 import ittalents.webappsports.util.userAuthorities;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @RestController
 public class ArticleController extends SportalController {
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
-
+    ArticleDAO articleDAO;
     @Autowired
     ArticleRepository ar;
     @Autowired
@@ -53,7 +55,7 @@ public class ArticleController extends SportalController {
         if (ar.findByTitle(article.getTitle()) != null) {
             throw new BadRequestException("An article with this title already exists!");
         }
-        User user = (User) session.getAttribute("Logged");
+        User user = getUser(session);
         article.setAuthor(user.getUsername());
         ar.save(article);
     }
@@ -103,33 +105,13 @@ public class ArticleController extends SportalController {
     }
 
     @GetMapping("/articles/top5")
-    public Collection<Article> find5MostReadArticlesForTheDay() {
-        List<Article> list = new ArrayList<>();
-        String sql = "SELECT id FROM articles ORDER BY day_reads DESC LIMIT 5";
-        List<Long> longId = jdbcTemplate.queryForList(sql, Long.class);
-        longId.forEach(id -> {
-            Article article = ar.findById(id).get();
-            list.add(article);
-        });
-        return list;
+    public Collection<Article> top5ArticlesForTheDay() {
+        return articleDAO.find5MostReadArticlesForTheDay();
     }
 
     @Scheduled(cron = "* 59 23 * * *")
-    public void resetDayReads() {
-        jdbcTemplate.execute("UPDATE articles SET day_reads = 0");
-        System.out.println(LocalDateTime.now());
+    public void resetCounterForDayReads() {
+        articleDAO.resetDayReads();
     }
 
-    private void checkArticlePresence(long articleId) throws BadRequestException {
-        if (!ar.findById(articleId).isPresent()) {
-            throw new BadRequestException("Article not found!");
-        }
-    }
-
-    private void validateArticleAuthor(HttpSession session, long articleId) throws BadRequestException {
-        User admin = (User) session.getAttribute("Logged");
-        if (!ar.getOne(articleId).getAuthor().equals(admin.getUsername())) {
-            throw new BadRequestException("You are not the author of this article!");
-        }
-    }
-}
+   }
