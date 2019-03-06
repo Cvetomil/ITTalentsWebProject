@@ -44,10 +44,9 @@ public class ArticleController extends SportalController {
     }
 
     //Add new article
-    @PostMapping("/users/addArticle")
+    @PostMapping("/users/article")
     public void addArticle(@RequestBody Article article, HttpSession session)
             throws NotAdminException, UserNotLoggedException, BadRequestException {
-
         userAuthorities.validateAdmin(session);
         if (!cr.findById(article.getCatId()).isPresent()) {
             throw new BadRequestException("The category does not exist!");
@@ -55,13 +54,13 @@ public class ArticleController extends SportalController {
         if (ar.findByTitle(article.getTitle()) != null) {
             throw new BadRequestException("An article with this title already exists!");
         }
-        User user = getUser(session);
-        article.setAuthor(user.getUsername());
+        User admin = getUser(session);
+        article.setAuthor(admin.getUsername());
         ar.save(article);
     }
 
     //Edit existing article
-    @PutMapping("/users/editArticle/{articleId}")
+    @PutMapping("/users/articles/{articleId}")
     public Article editArticle(@RequestBody EditedArticleDTO articleDTO, HttpSession session, @PathVariable long articleId)
             throws NotAdminException, UserNotLoggedException, BadRequestException {
         userAuthorities.validateAdmin(session);
@@ -80,13 +79,13 @@ public class ArticleController extends SportalController {
     }
 
     //Delete article
-    @DeleteMapping("/users/deleteArticle/{articleId}")
+    @DeleteMapping("/users/articles/{articleId}")
     public void deleteArticle(HttpSession session, @PathVariable long articleId)
             throws NotAdminException, UserNotLoggedException, BadRequestException {
         userAuthorities.validateAdmin(session);
         checkArticlePresence(articleId);
         validateArticleAuthor(session, articleId);
-        ar.delete(ar.getOne(articleId));
+        ar.delete(ar.findById(articleId).get());
     }
 
     @GetMapping("/search/{title}")
@@ -114,4 +113,4 @@ public class ArticleController extends SportalController {
         articleDAO.resetDayReads();
     }
 
-   }
+}

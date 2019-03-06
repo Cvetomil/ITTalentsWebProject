@@ -1,5 +1,6 @@
 package ittalents.webappsports.controllers;
 
+import ittalents.webappsports.dto.EditedCommentDTO;
 import ittalents.webappsports.exceptions.BadRequestException;
 import ittalents.webappsports.exceptions.UserNotLoggedException;
 import ittalents.webappsports.models.Comment;
@@ -19,49 +20,44 @@ public class CommentController extends SportalController {
     CommentRepository cr;
 
     //adding a comment
-    @PostMapping("/articles/{articleId}/addcomment")
+    @PostMapping("/articles/{articleId}/comment")
     public void addComment(@RequestBody String text, HttpSession session, @PathVariable long articleId)
             throws UserNotLoggedException, BadRequestException {
         userAuthorities.validateUser(session);
         checkArticlePresence(articleId);
         Comment comment = new Comment();
         comment.setArtId(articleId);
-        comment.setUserId((long) session.getAttribute("userId"));
+        comment.setUserId(getUser(session).getId());
         comment.setText(text);
         cr.save(comment);
     }
 
     //delete a comment
-    @DeleteMapping("/articles/{articleId}/deletecomment/{commentId}")
+        @DeleteMapping("/articles/{articleId}/comment/{commentId}")
     public void deleteComment(HttpSession session, @PathVariable long commentId, @PathVariable long articleId)
             throws BadRequestException, UserNotLoggedException {
-        userAuthorities.validateUser(session);
-        checkArticlePresence(articleId);
-        checkCommentPresence(commentId);
+        Comment comment = validateEligibility(session, articleId, commentId);
         validateCommentAuthor(session, commentId);
-        validateIfCommentBelongsToArticle(articleId, commentId);
-        cr.delete(cr.getOne(commentId));
-    }
+                cr.delete(comment);
+
+            }
 
     //editing a comment
-    @PutMapping("/articles/{articleId}/editcomment/{commentId}")
-    public void editComment(HttpSession session, @RequestBody String text,
+    @PutMapping("/articles/{articleId}/comment/{commentId}")
+    public void editComment(HttpSession session, @RequestBody EditedCommentDTO editedCommentDTO,
                             @PathVariable long articleId, @PathVariable long commentId)
             throws BadRequestException, UserNotLoggedException {
-        userAuthorities.validateUser(session);
-        checkArticlePresence(articleId);
-        checkCommentPresence(commentId);
+                validateEligibility(session, articleId, commentId);
         validateCommentAuthor(session, commentId);
-        validateIfCommentBelongsToArticle(articleId, commentId);
-        Comment comment = cr.getOne(commentId);
+                Comment comment = cr.getOne(commentId);
         comment.setEdited(true);
         comment.setLastEdited(LocalDateTime.now());
-        comment.setText(text);
+        comment.setText(editedCommentDTO.getText());
         cr.save(comment);
     }
 
     //delete all comments for a user
-    @DeleteMapping("/users/deleteallcomments")
+    @DeleteMapping("/users/comments")
     @Transactional
         public void deleteAllComments(HttpSession session) throws UserNotLoggedException {
         userAuthorities.validateUser(session);

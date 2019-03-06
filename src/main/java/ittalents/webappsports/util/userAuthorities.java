@@ -20,7 +20,7 @@ public class userAuthorities {
         else{
             User loggedUser = (User)session.getAttribute("Logged");
             if(!isAdmin(loggedUser)){
-                throw new NotAdminException("YOu are not admin");
+                throw new NotAdminException("You are not admin");
             }
         }
     }

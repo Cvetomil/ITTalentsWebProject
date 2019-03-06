@@ -3,6 +3,8 @@ package ittalents.webappsports.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.List;
@@ -17,8 +19,7 @@ public class Category {
     @Id
     private long id;
     private String name;
-//@OneToMany(mappedBy = "catId", targetEntity = Article.class,
-//    fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @OneToMany(mappedBy = "catId")
+    @OneToMany(mappedBy = "catId", cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Article> articles;
 }

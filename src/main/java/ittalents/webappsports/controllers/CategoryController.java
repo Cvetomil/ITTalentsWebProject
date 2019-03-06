@@ -1,5 +1,6 @@
 package ittalents.webappsports.controllers;
 
+import ittalents.webappsports.exceptions.BadRequestException;
 import ittalents.webappsports.models.Category;
 import ittalents.webappsports.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +21,15 @@ public class CategoryController {
     CategoryRepository cr;
 
     @GetMapping("/categories/{id}")
-public Category getCategory (@PathVariable long id){
-    return cr.findById(id).get();
-}
+    public Category getCategory(@PathVariable long id) throws BadRequestException {
+        if (!cr.findById(id).isPresent()) {
+            throw new BadRequestException("No such category");
+        }
+        return cr.findById(id).get();
+    }
 
-@GetMapping("/categories/search/{title}")
-public List<Category> findByName (@PathVariable String title){
-
-
+    @GetMapping("/categories/search/{title}")
+    public List<Category> findByName(@PathVariable String title) {
         return cr.getAllByNameContaining(title);
-}
+    }
 }

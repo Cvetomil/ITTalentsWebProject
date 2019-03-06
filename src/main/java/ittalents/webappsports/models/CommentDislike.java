@@ -1,5 +1,6 @@
 package ittalents.webappsports.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,21 +11,22 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Table(name = "dislikes")
 @Entity
+@IdClass(CommentDislike.CommentDisLikeId.class)
 public class CommentDislike {
+    @Id
+    private long userId;
+    @Id
+    private long commentId;
 
-    @Embeddable
+
     @Getter
     @Setter
     @NoArgsConstructor
     @EqualsAndHashCode
-    static public class CommentDislikeId implements Serializable{
-
+    public static class CommentDisLikeId implements Serializable {
         private long userId;
+        @JsonIgnore
         private long commentId;
-
     }
-
-    @EmbeddedId
-    private CommentDislikeId id;
 
 }

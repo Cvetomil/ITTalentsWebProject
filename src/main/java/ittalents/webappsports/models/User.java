@@ -1,9 +1,10 @@
 package ittalents.webappsports.models;
 
-import jdk.jfr.BooleanFlag;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -32,8 +33,9 @@ public class User {
     @Min(1)
     @Column
     private int age;
-    @OneToMany(mappedBy = "userId")
-    private List<Comment> comments;
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+        private List<Comment> comments;
     @Column(name = "gender")
     @Enumerated(EnumType.ORDINAL)
     private Gender gender;

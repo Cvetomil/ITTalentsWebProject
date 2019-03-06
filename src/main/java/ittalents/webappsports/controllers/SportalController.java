@@ -1,6 +1,7 @@
 package ittalents.webappsports.controllers;
 
 import ittalents.webappsports.exceptions.*;
+import ittalents.webappsports.models.Article;
 import ittalents.webappsports.models.Comment;
 import ittalents.webappsports.models.User;
 import ittalents.webappsports.repositories.ArticleRepository;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
-import java.util.List;
+import java.util.Optional;
 
 @ControllerAdvice
 public class SportalController {
@@ -90,28 +91,32 @@ public class SportalController {
 
     }
 
-    public void checkArticlePresence(long articleId) throws BadRequestException {
-        if (!ar.findById(articleId).isPresent()) {
+    public Article checkArticlePresence(long articleId) throws BadRequestException {
+        Optional<Article> article = ar.findById(articleId);
+        if (!article.isPresent()) {
             throw new BadRequestException("Article not found!");
         }
+        return article.get();
     }
 
     public void validateArticleAuthor(HttpSession session, long articleId)
-            throws BadRequestException, UserNotLoggedException {
+            throws BadRequestException {
         User admin = getUser(session);
         if (!ar.getOne(articleId).getAuthor().equals(admin.getUsername())) {
             throw new BadRequestException("You are not the author of this article!");
         }
     }
 
-    public void checkCommentPresence(long commentId) throws BadRequestException {
+    public Comment checkCommentPresence(long commentId) throws BadRequestException {
+        Optional<Comment> comment = cr.findById(commentId);
         if (!cr.findById(commentId).isPresent()) {
             throw new BadRequestException("Comment not found!");
         }
+        return comment.get();
     }
 
     public void validateCommentAuthor(HttpSession session, long commentId)
-            throws BadRequestException, UserNotLoggedException {
+            throws BadRequestException{
         long userId = getUser(session).getId();
         long commentCreatorId = cr.getOne(commentId).getUserId();
         if (userId != commentCreatorId) {
@@ -119,18 +124,26 @@ public class SportalController {
         }
     }
 
-    public void validateIfCommentBelongsToArticle (long articleId, long commentId)
+    public void validateIfCommentBelongsToArticle (Article article, Comment comment)
             throws BadRequestException{
-        List<Comment> comments = ar.getOne(articleId).getComments();
-        if (!comments.contains(cr.getOne(commentId))){
-            throw new BadRequestException("The comment is not for this article!");
+        if (comment.getArtId() != article.getId()){
+            throw new BadRequestException("Comment doesn't belong to this article!");
         }
     }
 
-    public User getUser(HttpSession session) throws UserNotLoggedException {
+    public Comment validateEligibility (HttpSession session, long articleId, long commentId)
+            throws UserNotLoggedException, BadRequestException{
         userAuthorities.validateUser(session);
-        return (User) session.getAttribute("Logged");
+        Article article = checkArticlePresence(articleId);
+        Comment comment =  checkCommentPresence(commentId);
+        validateIfCommentBelongsToArticle(article, comment);
+        return comment;
     }
+
+    public User getUser(HttpSession session) {
+                return (User) session.getAttribute("Logged");
+    }
+
     @ExceptionHandler(MediaException.class)
     public String handleMediaExceptions(Exception e){
         log.error(e.getMessage());

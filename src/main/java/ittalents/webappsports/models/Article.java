@@ -3,6 +3,8 @@ package ittalents.webappsports.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -19,8 +21,8 @@ public class Article {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private long id;
-        private long catId;
+    private long id;
+    private long catId;
     private String title;
     private String text;
     private LocalDate dateAdded = LocalDate.now();
@@ -30,8 +32,10 @@ public class Article {
     private boolean isEdited = false;
     private LocalDateTime lastEdited;
     @OneToMany(mappedBy = "artId", cascade = CascadeType.ALL)
-    private List<Comment> comments;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+        private List<Comment> comments;
     @OneToMany(mappedBy = "artId", cascade = CascadeType.ALL)
-private List<Picture> pictures;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+        private List<Picture> pictures;
 
 }

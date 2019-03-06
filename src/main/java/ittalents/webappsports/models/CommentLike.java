@@ -1,7 +1,10 @@
 package ittalents.webappsports.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -11,22 +14,22 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Table(name = "likes")
 @Entity
+@IdClass(CommentLike.CommentLikeId.class)
 public class CommentLike {
+    @Id
+    private long userId;
+@Id
+    private long commentId;
 
-@Embeddable
-@Getter
-@Setter
-@NoArgsConstructor
-@EqualsAndHashCode
-    static public class CommentLikeId implements Serializable{
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @EqualsAndHashCode
+    public static class CommentLikeId implements Serializable {
         private long userId;
         @JsonIgnore
-                private long commentId;
-
+        private long commentId;
     }
-
-@EmbeddedId
-    private CommentLikeId id;
 
 }

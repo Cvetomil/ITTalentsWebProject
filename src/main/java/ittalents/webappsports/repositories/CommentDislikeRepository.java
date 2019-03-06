@@ -4,5 +4,6 @@ import ittalents.webappsports.models.CommentDislike;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CommentDislikeRepository extends JpaRepository<CommentDislike, Long> {
-    CommentDislike findById(CommentDislike.CommentDislikeId a);
+
+    CommentDislike findByCommentIdAndUserId(long commentId, long userId);
 }
