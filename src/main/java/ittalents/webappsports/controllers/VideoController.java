@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @RestController
-public class VideoUploadController {
+public class VideoController {
     @Autowired
     VideoRepository videoRepository;
 

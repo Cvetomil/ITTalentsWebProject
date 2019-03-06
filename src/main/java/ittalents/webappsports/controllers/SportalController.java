@@ -131,4 +131,9 @@ public class SportalController {
         userAuthorities.validateUser(session);
         return (User) session.getAttribute("Logged");
     }
+    @ExceptionHandler(MediaException.class)
+    public String handleMediaExceptions(Exception e){
+        log.error(e.getMessage());
+        return e.getMessage();
+    }
 }

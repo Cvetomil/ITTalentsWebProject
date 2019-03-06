@@ -1,5 +1,6 @@
 package ittalents.webappsports.models;
 
+import jdk.jfr.BooleanFlag;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,9 @@ import java.util.List;
 @Table(name = "users")
 @Entity
 public class User {
+    private enum Gender{
+        MALE,FEMALE
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -26,21 +30,24 @@ public class User {
     @NotNull
     private String email;
     @Min(1)
+    @Column
     private int age;
-    private enum Gender{
-        MALE,FEMALE
-    }
-
     @OneToMany(mappedBy = "userId")
     private List<Comment> comments;
+    @Column(name = "gender")
+    @Enumerated(EnumType.ORDINAL)
+    private Gender gender;
 
     @Override
     public String toString() {
         return "User{" +
-                "roleId=" + roleId +
+                "id=" + id +
+                ", roleId=" + roleId +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
+                ", age=" + age +
+                ", comments=" + comments +
                 '}';
     }
 }

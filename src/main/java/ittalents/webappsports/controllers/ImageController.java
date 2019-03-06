@@ -1,8 +1,7 @@
 package ittalents.webappsports.controllers;
 
 import ittalents.webappsports.dto.ImageUploadDTO;
-import ittalents.webappsports.exceptions.NotAdminException;
-import ittalents.webappsports.exceptions.UserNotLoggedException;
+import ittalents.webappsports.exceptions.*;
 import ittalents.webappsports.models.Picture;
 import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.PictureRepository;
@@ -16,9 +15,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Optional;
 
 @RestController
-public class ImageUploadController {
+public class ImageController {
 
     @Autowired
     ArticleRepository ar;
@@ -47,13 +47,34 @@ public class ImageUploadController {
         File newImage = new File(IMAGE_DIR + picturePath.toString() + ".png");
         FileOutputStream fos = new FileOutputStream(newImage);
         fos.write(bytes);
-
     }
-
     @GetMapping(value="/images/{name}", produces = "image/png")
     public byte[] downloadImage(@PathVariable("name") String imageName) throws IOException {
         File newImage = new File(IMAGE_DIR +imageName);
         FileInputStream fis = new FileInputStream(newImage);
         return fis.readAllBytes();
+    }
+    @DeleteMapping("/image/{id}")
+    public Picture deletePicture(@PathVariable("id") long id, HttpSession session) throws UserException,NotFoundException,MediaException {
+        userAuthorities.validateAdmin(session);
+        Picture picture;
+        Optional<Picture> pictureOptional = pr.findById(id);
+        if(!pictureOptional.isPresent()){
+            throw new NotFoundException("Picture not found");
+        }
+        picture = pictureOptional.get();
+
+        pr.delete(picture);
+
+
+        File file = new File(IMAGE_DIR + picture.getPath());
+        if(file.delete()){
+            return picture;
+        }
+        else{
+            throw new MediaException("Picture could not be deleted");
+        }
+
+
     }
 }

@@ -10,14 +10,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -39,12 +35,11 @@ public class UserController extends SportalController{
 
 
     @PostMapping("/register")
-    public UserDTO registerUser(@RequestBody User user) throws UserException, MessagingException {
+    public UserDTO registerUser(@RequestBody User user) throws UserException {
         emailExist(user.getEmail());
         usernameExist(user.getUsername());
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
-
         new Thread(() -> {
             try {
                 EmailSender.sendEmail(user.getEmail(),"registration","You have been registered");
@@ -54,26 +49,25 @@ public class UserController extends SportalController{
         }).start();
         log.info("user registered");
         return new UserDTO().convertToDTO(user);
-
     }
 
     private void emailExist(String email) throws EmailAlreadyExist {
         User user = userRepository.getByEmail(email);
         if(user != null){
-            throw new EmailAlreadyExist();
+            throw new EmailAlreadyExist("email already exist");
         }
     }
     private void usernameExist(String username) throws UsernameAlreadyExist {
         User user = userRepository.getByUsername(username);
         if(user != null){
-            throw new UsernameAlreadyExist();
+            throw new UsernameAlreadyExist("username already exist");
         }
     }
     @PostMapping("/login")
     public UserDTO login(@RequestBody User user, HttpSession session) throws UserException{
         User userToJson = userRepository.getByUsername(user.getUsername());
         if(userToJson == null){
-            throw new WrongCredentialsException();
+            throw new WrongCredentialsException("wrong username or password");
         }
         else {
             if (encoder.matches(user.getPassword(), userToJson.getPassword())) {
@@ -83,7 +77,7 @@ public class UserController extends SportalController{
                 session.setAttribute("roleId", userToJson.getRoleId());
                 return new UserDTO().convertToDTO(userToJson);
             }
-            throw new WrongCredentialsException();
+            throw new WrongCredentialsException("wrong username or password");
         }
     }
     @PostMapping("/logout")

@@ -10,17 +10,17 @@ import javax.servlet.http.HttpSession;
 public class userAuthorities {
     public static void validateUser(HttpSession session) throws UserNotLoggedException {
         if(session.getAttribute("Logged") == null){
-            throw new UserNotLoggedException();
+            throw new UserNotLoggedException("User not logged");
         }
     }
     public static void validateAdmin(HttpSession session) throws UserNotLoggedException, NotAdminException {
         if(session.getAttribute("Logged") == null){
-            throw new UserNotLoggedException();
+            throw new UserNotLoggedException("User not logged");
         }
         else{
             User loggedUser = (User)session.getAttribute("Logged");
             if(!isAdmin(loggedUser)){
-                throw new NotAdminException();
+                throw new NotAdminException("YOu are not admin");
             }
         }
     }
