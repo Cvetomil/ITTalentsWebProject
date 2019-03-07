@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @RestController
 public class CommentController extends SportalController {
@@ -25,11 +26,16 @@ public class CommentController extends SportalController {
             throws UserNotLoggedException, BadRequestException {
         userAuthorities.validateUser(session);
         checkArticlePresence(articleId);
+        LocalTime lastCommentTime = (LocalTime) session.getAttribute("commentTime");
+        if (lastCommentTime.plusMinutes(1).isAfter(LocalTime.now())){
+            throw new BadRequestException("You have already commented in the last minute!");
+        }
         Comment comment = new Comment();
         comment.setArtId(articleId);
         comment.setUserId(getUser(session).getId());
         comment.setText(text);
         cr.save(comment);
+        session.setAttribute("commentTime", LocalTime.now());
     }
 
     //delete a comment

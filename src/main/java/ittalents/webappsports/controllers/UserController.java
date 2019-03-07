@@ -10,11 +10,15 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
+import java.time.LocalTime;
 import java.util.Optional;
 
 import static ittalents.webappsports.util.userAuthorities.validateUser;
@@ -77,8 +81,9 @@ public class UserController extends SportalController{
             if (encoder.matches(user.getPassword(), userToJson.getPassword())) {
 
                 session.setAttribute("Logged", userToJson);
-                session.setAttribute("userId", userToJson.getId());
-                session.setAttribute("roleId", userToJson.getRoleId());
+               session.setAttribute("userId", userToJson.getId());
+               session.setAttribute("roleId", userToJson.getRoleId());
+               session.setAttribute("commentTime", LocalTime.MIN);
                 return new UserDTO().convertToDTO(userToJson);
             }
             throw new WrongCredentialsException("wrong username or password");
