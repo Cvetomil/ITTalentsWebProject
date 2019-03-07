@@ -3,25 +3,36 @@ package ittalents.webappsports.controllers;
 
 import ittalents.webappsports.dto.UserDTO;
 import ittalents.webappsports.exceptions.*;
+import ittalents.webappsports.models.ConfirmationToken;
 import ittalents.webappsports.models.User;
+import ittalents.webappsports.repositories.ConfirmationTokenRep;
 import ittalents.webappsports.repositories.UserRepository;
 import ittalents.webappsports.util.EmailSender;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static ittalents.webappsports.util.userAuthorities.validateUser;
+import static ittalents.webappsports.util.userAuthorities.verifiedAcc;
 
 
 @RestController
 public class UserController extends SportalController{
+
+    private static final String VERIFICATION_URL = "http://localhost:8080/confirm-account-code=";
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -29,26 +40,56 @@ public class UserController extends SportalController{
     @Autowired
     UserRepository userRepository;
 
-    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    @Autowired
+    ConfirmationTokenRep confirmationTokenRep;
+
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     static Logger log = Logger.getLogger(UserController.class.getName());
 
     //register a user
     @PostMapping("/register")
-    public UserDTO registerUser(@RequestBody User user) throws UserException {
+    public UserDTO registerUser(@RequestBody User user) throws UserException, BadRequestException {
+        verifyGivenData(user);
         emailExist(user.getEmail());
         usernameExist(user.getUsername());
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
+
+        ConfirmationToken confirmationToken = new ConfirmationToken(user);
+
+        confirmationTokenRep.save(confirmationToken);
+        sendVerificationEmail(user,confirmationToken);
+        return new UserDTO().convertToDTO(user);
+    }
+
+    //verify if user entered everything correct
+    private void verifyGivenData(User user) throws BadRequestException {
+        if(user.getAge() < 1){
+            throw new BadRequestException("Age cannot be negative number");
+        }
+        if(user.getEmail() == null){
+            throw new BadRequestException("You need to enter an email");
+        }
+        if(user.getPassword() == null){
+            throw new BadRequestException("You need to enter a password");
+        }
+        if(user.getUsername() == null){
+            throw new BadRequestException("You need to input username");
+        }
+        //gender verification
+    }
+    private void sendVerificationEmail(User user, ConfirmationToken confirmationToken){
         new Thread(() -> {
             try {
-                EmailSender.sendEmail(user.getEmail(),"registration","You have been registered");
+                EmailSender.sendEmail(
+                        user.getEmail(),
+                        "Confirm your account",
+                        "Please follow this link to confirm your account: "+ VERIFICATION_URL + confirmationToken.getCode());
             } catch (MessagingException e) {
                 System.out.println("Something went wrong with the mail service");
             }
         }).start();
-        log.info("user registered");
-        return new UserDTO().convertToDTO(user);
     }
 
     // checks if email exist in database
@@ -58,6 +99,23 @@ public class UserController extends SportalController{
             throw new EmailAlreadyExist("email already exist");
         }
     }
+
+    //enable user account
+    @GetMapping(value="/confirm-account-code={code}")
+    public String confirmUserAccount(@PathVariable String code) throws NotFoundException {
+        ConfirmationToken token = confirmationTokenRep.findByCode(code);
+
+        if(token != null){
+            User user = userRepository.getByEmail(token.getUser().getEmail());
+            user.setConfirmed(true);
+            userRepository.save(user);
+            return "registration confirmed";
+        }
+        else{
+            throw new NotFoundException("Token not found");
+        }
+    }
+
     // checks if username exist in database
     private void usernameExist(String username) throws UsernameAlreadyExist {
         User user = userRepository.getByUsername(username);
@@ -74,6 +132,7 @@ public class UserController extends SportalController{
             throw new WrongCredentialsException("wrong username or password");
         }
         else {
+            verifiedAcc(userToJson); // checks if acc is enabled
             if (encoder.matches(user.getPassword(), userToJson.getPassword())) {
 
                 session.setAttribute("Logged", userToJson);
@@ -97,15 +156,15 @@ public class UserController extends SportalController{
         User userFromDB = getUserFromSession(session);
         userFromDB.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(userFromDB);
-        return new UserDTO().convertToDTO(user);
+        return new UserDTO().convertToDTO(userFromDB);
     }
     //edit username on logged user
     @PutMapping("/user/edit/username")
-    public User changeUsername(@RequestBody User user, HttpSession session) throws UserException, NotFoundException {
+    public UserDTO changeUsername(@RequestBody User user, HttpSession session) throws UserException, NotFoundException {
         User userFromDB = getUserFromSession(session);
         userFromDB.setUsername(user.getUsername());
         userRepository.save(userFromDB);
-        return user;
+        return new UserDTO().convertToDTO(userFromDB);
     }
     private User getUserFromSession(HttpSession session) throws UserNotLoggedException, NotFoundException {
         validateUser(session);

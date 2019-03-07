@@ -3,6 +3,7 @@ package ittalents.webappsports.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Value;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -17,7 +18,7 @@ import java.util.List;
 @Table(name = "users")
 @Entity
 public class User {
-    private enum Gender{
+    public enum Gender{
         MALE,FEMALE
     }
     @Id
@@ -30,15 +31,17 @@ public class User {
     @Column(unique = true, length = 256)
     @NotNull
     private String email;
-    @Min(1)
+    @Min(value = 1)
     @Column
     private int age;
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
-        private List<Comment> comments;
+    private List<Comment> comments;
     @Column(name = "gender")
     @Enumerated(EnumType.ORDINAL)
+    //validate enum
     private Gender gender;
+    private boolean isConfirmed;
 
     @Override
     public String toString() {
@@ -50,6 +53,8 @@ public class User {
                 ", email='" + email + '\'' +
                 ", age=" + age +
                 ", comments=" + comments +
+                ", gender=" + gender +
+                ", isConfirmed=" + isConfirmed +
                 '}';
     }
 }

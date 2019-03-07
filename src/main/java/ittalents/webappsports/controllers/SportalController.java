@@ -30,6 +30,11 @@ public class SportalController {
     static Logger log = Logger.getLogger(SportalController.class.getName());
 
 
+    @ExceptionHandler({UserException.class})
+    public String handleUserException(UserException e){
+        log.error("user exception");
+        return e.getMessage();
+    }
     @ExceptionHandler({UserNotLoggedException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     public String handleUserException() {

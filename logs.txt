@@ -1,2 +1,28 @@
 2019-03-06 -ittalents.webappsports.controllers.SportalController :User not logged exception
-35handleUserException
+35handleUserException2019-03-06 -ittalents.webappsports.controllers.SportalController :same username exception
+54sameUsername2019-03-06 -ittalents.webappsports.controllers.UserController :user registered
+66registerUser2019-03-06 -ittalents.webappsports.controllers.UserController :user registered
+66registerUser2019-03-06 -ittalents.webappsports.controllers.UserController :user registered
+66registerUser2019-03-06 -ittalents.webappsports.controllers.UserController :user registered
+66registerUser2019-03-06 -ittalents.webappsports.controllers.UserController :user registered
+66registerUser2019-03-06 -ittalents.webappsports.controllers.UserController :user registered
+66registerUser2019-03-07 -ittalents.webappsports.controllers.SportalController :Bad request exception
+89handleBadRequestsExceptions2019-03-07 -ittalents.webappsports.controllers.SportalController :Bad request exception
+89handleBadRequestsExceptions2019-03-07 -ittalents.webappsports.controllers.SportalController :same username exception
+54sameUsername2019-03-07 -ittalents.webappsports.controllers.SportalController :email exist exception
+48sameEmail2019-03-07 -ittalents.webappsports.controllers.SportalController :email exist exception
+48sameEmail2019-03-07 -ittalents.webappsports.controllers.SportalController :email exist exception
+48sameEmail2019-03-07 -ittalents.webappsports.controllers.SportalController :wrong username or password exception
+61wrongUsernameOrPassword2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :email exist exception
+53sameEmail2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :user exception
+35handleUserException2019-03-07 -ittalents.webappsports.controllers.SportalController :wrong username or password exception
+66wrongUsernameOrPassword
