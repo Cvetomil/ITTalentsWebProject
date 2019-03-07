@@ -81,7 +81,7 @@ public class SportalController {
         return e.getMessage();
     }
 
-    @ExceptionHandler(TeaPotException.class)
+    @ExceptionHandler(NumberFormatException.class)
     @ResponseStatus(value = HttpStatus.I_AM_A_TEAPOT)
     public String handleTeaPotException(Exception e) {
         log.error("Teapot exception");

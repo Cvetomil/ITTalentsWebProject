@@ -11,18 +11,13 @@ import ittalents.webappsports.util.EmailSender;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
-import javax.transaction.Transactional;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalTime;
 import java.util.Optional;
 
 import static ittalents.webappsports.util.userAuthorities.validateUser;
@@ -136,8 +131,9 @@ public class UserController extends SportalController{
             if (encoder.matches(user.getPassword(), userToJson.getPassword())) {
 
                 session.setAttribute("Logged", userToJson);
-                session.setAttribute("userId", userToJson.getId());
-                session.setAttribute("roleId", userToJson.getRoleId());
+               session.setAttribute("userId", userToJson.getId());
+               session.setAttribute("roleId", userToJson.getRoleId());
+               session.setAttribute("commentTime", LocalTime.MIN);
                 return new UserDTO().convertToDTO(userToJson);
             }
             throw new WrongCredentialsException("wrong username or password");

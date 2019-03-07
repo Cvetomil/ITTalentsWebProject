@@ -1,10 +1,11 @@
 package ittalents.webappsports.controllers;
 
+import ittalents.webappsports.dao.CategoryDAO;
+import ittalents.webappsports.dto.CategoryReadsDTO;
 import ittalents.webappsports.exceptions.BadRequestException;
 import ittalents.webappsports.models.Category;
 import ittalents.webappsports.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +16,7 @@ import java.util.List;
 public class CategoryController {
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    CategoryDAO categoryDAO;
 
     @Autowired
     CategoryRepository cr;
@@ -33,5 +34,10 @@ public class CategoryController {
     @GetMapping("/categories/search/{title}")
     public List<Category> findByName(@PathVariable String title) {
         return cr.getAllByNameContaining(title);
+    }
+
+    @GetMapping("/categories/totalreads")
+    public List<CategoryReadsDTO> categoriesByTotalReads (){
+        return categoryDAO.getCategoriesByTotalReads();
     }
 }
