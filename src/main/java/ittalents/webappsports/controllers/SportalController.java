@@ -6,6 +6,7 @@ import ittalents.webappsports.models.Comment;
 import ittalents.webappsports.models.User;
 import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.CommentRepository;
+import ittalents.webappsports.util.MsgResponse;
 import ittalents.webappsports.util.userAuthorities;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartException;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
@@ -31,55 +33,51 @@ public class SportalController {
 
 
     @ExceptionHandler({UserException.class})
-    public String handleUserException(UserException e){
-        log.error("user exception");
-        return e.getMessage();
+    public MsgResponse handleUserException(UserException e){
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.BAD_REQUEST.value(),e.getMessage());
     }
     @ExceptionHandler({UserNotLoggedException.class})
-    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public String handleUserException() {
-        log.error("User not logged exception");
-        return "You are not logged in!";
+    public MsgResponse handleUserException(UserNotLoggedException e) {
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.UNAUTHORIZED.value(),e.getMessage());
     }
 
     @ExceptionHandler({NotAdminException.class})
-    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public String handleNotAdminException() {
-        log.error("User not admin exception");
-        return "You are not admin!";
+    public MsgResponse handleNotAdminException(NotAdminException e) {
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.UNAUTHORIZED.value(),e.getMessage());
     }
 
     @ExceptionHandler({EmailAlreadyExist.class})
-    public String sameEmail() {
-        log.error("email exist exception");
-        return "User with that email already exist";
+    public MsgResponse sameEmail(EmailAlreadyExist e) {
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.CONFLICT.value(),e.getMessage());
     }
 
     @ExceptionHandler({UsernameAlreadyExist.class})
-    public String sameUsername() {
-        log.error("same username exception");
-        return "User with that username already exist";
+    public MsgResponse sameUsername(UsernameAlreadyExist e) {
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.CONFLICT.value(),e.getMessage());
     }
 
     @ExceptionHandler({WrongCredentialsException.class})
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public String wrongUsernameOrPassword() {
-        log.error("wrong username or password exception");
-        return "Wrong username or password";
+    public MsgResponse wrongUsernameOrPassword(WrongCredentialsException e) {
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.BAD_REQUEST.value(),e.getMessage());
     }
 
     @ExceptionHandler({MessagingException.class})
-    public String handleEmailException() {
-        log.error("mail service exception");
-        return "Something went wrong with the mail service";
+    public MsgResponse handleEmailException(MessagingException e) {
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.EXPECTATION_FAILED.value(),e.getMessage());
     }
 
 
     @ExceptionHandler({NotFoundException.class})
-    @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public String handleNotFoundException(Exception e) {
-        log.error("Not found exception");
-        return e.getMessage();
+    public MsgResponse handleNotFoundException(NotFoundException e) {
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.NOT_FOUND.value(),e.getMessage());
     }
 
     @ExceptionHandler(NumberFormatException.class)
@@ -89,11 +87,16 @@ public class SportalController {
         return e.getMessage();
     }
 
+    @ExceptionHandler(MultipartException.class)
+    public MsgResponse handleMultipartException(MultipartException e) {
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.SERVICE_UNAVAILABLE.value(),e.getMessage());
+    }
+
     @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public String handleBadRequestsExceptions(Exception e) {
-        log.error("Bad request exception");
-        return e.getMessage();
+    public MsgResponse handleBadRequestsExceptions(BadRequestException e) {
+        log.error(e.getMessage());
+        return new MsgResponse(HttpStatus.BAD_REQUEST.value(),e.getMessage());
 
     }
 
@@ -150,8 +153,8 @@ public class SportalController {
     }
 
     @ExceptionHandler(MediaException.class)
-    public String handleMediaExceptions(Exception e){
+    public MsgResponse handleMediaExceptions(MediaException e){
         log.error(e.getMessage());
-        return e.getMessage();
+        return new MsgResponse(HttpStatus.EXPECTATION_FAILED.value(),e.getMessage());
     }
 }

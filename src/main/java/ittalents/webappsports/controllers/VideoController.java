@@ -35,7 +35,7 @@ public class VideoController extends SportalController{
     public Video uploadVideo(@RequestParam("video") MultipartFile file,@PathVariable long artId, HttpSession session) throws UserException, IOException, BadRequestException {
         User admin = userAuthorities.validateAdmin(session);
 
-         Article article = checkArticlePresence(artId);
+        Article article = checkArticlePresence(artId);
 
         validateArticleAuthor(admin,article);
 
