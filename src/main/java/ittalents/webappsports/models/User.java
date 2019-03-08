@@ -8,8 +8,10 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.List;
 
 @Getter
@@ -18,9 +20,6 @@ import java.util.List;
 @Table(name = "users")
 @Entity
 public class User {
-    public enum Gender{
-        MALE,FEMALE
-    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -28,19 +27,18 @@ public class User {
     @Column(unique = true, length = 256)
     private String username;
     private String password;
+    @Transient
+    private String confirmPassword;
     @Column(unique = true, length = 256)
     @NotNull
     private String email;
     @Min(value = 1)
+    @Max(value = Integer.MAX_VALUE)
     @Column
     private int age;
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Comment> comments;
-    @Column(name = "gender")
-    @Enumerated(EnumType.ORDINAL)
-    //validate enum
-    private Gender gender;
     private boolean isConfirmed;
 
     @Override
@@ -53,7 +51,6 @@ public class User {
                 ", email='" + email + '\'' +
                 ", age=" + age +
                 ", comments=" + comments +
-                ", gender=" + gender +
                 ", isConfirmed=" + isConfirmed +
                 '}';
     }

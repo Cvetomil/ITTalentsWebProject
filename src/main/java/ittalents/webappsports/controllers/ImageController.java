@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,49 +19,61 @@ import java.util.Base64;
 import java.util.Optional;
 
 @RestController
-public class ImageController {
+public class ImageController extends SportalController{
 
     @Autowired
     ArticleRepository ar;
     @Autowired
     PictureRepository pr;
 
-    public static final String IMAGE_DIR = "C:\\Users\\aleks\\Pictures\\Upload\\";
+    private static final String IMAGE_DIR = "D:\\images\\";
 
-    //upload image to database and save to hard drive
+    //upload image to database and save to server
     @PostMapping("/images/upload/{artId}")
-    public void uploadImage(@RequestBody ImageUploadDTO dto, @PathVariable long artId, HttpSession session) throws IOException, UserNotLoggedException, NotAdminException {
+    public Picture uploadImage(@RequestBody ImageUploadDTO dto, @PathVariable long artId, HttpSession session) throws IOException,BadRequestException, UserException {
 
         userAuthorities.validateAdmin(session);
 
-        StringBuilder picturePath = new StringBuilder();
-        picturePath.append( ar.getOne(artId).getTitle());
-        picturePath.append(System.currentTimeMillis());
+        checkArticlePresence(artId);
+
+        validateArticleAuthor(session,artId);
+
+        String imgPath = System.currentTimeMillis() + ar.getOne(artId).getTitle();
 
         Picture picture = new Picture();
-        picture.setPath(picturePath.toString());
+        picture.setPath(IMAGE_DIR + imgPath);
         picture.setArtId(artId);
         pr.save(picture);
 
         String base64 = dto.getFileStr();
                 byte[] bytes = Base64.getDecoder().decode(base64);
 
-        File newImage = new File(IMAGE_DIR + picturePath.toString() + ".png");
+        File newImage = new File(IMAGE_DIR + imgPath + ".png");
         FileOutputStream fos = new FileOutputStream(newImage);
         fos.write(bytes);
+        return picture;
     }
 
     //download image
-    @GetMapping(value="/images/{name}", produces = "image/png")
-    public byte[] downloadImage(@PathVariable("name") String imageName) throws IOException {
-        File newImage = new File(IMAGE_DIR +imageName);
-        FileInputStream fis = new FileInputStream(newImage);
+    @GetMapping(value="/images/{id}", produces = "image/png")
+    public byte[] getImage(@PathVariable("id") long pictureId) throws IOException, NotFoundException {
+        Optional<Picture> pictureOptional = pr.findById(pictureId);
+        Picture pic;
+        if(!pictureOptional.isPresent()){
+            throw new NotFoundException("Picture does not exist");
+        }
+        pic = pictureOptional.get();
+
+        File newImage = new File(pic.getPath());
+        FileInputStream fis = new FileInputStream(newImage + ".png");
         return fis.readAllBytes();
     }
 
-    //delete picture from database and from hard drive
+
+    //delete picture
+    @Transactional
     @DeleteMapping("/image/{id}")
-    public Picture deletePicture(@PathVariable("id") long id, HttpSession session) throws UserException,NotFoundException,MediaException {
+    public void deletePicture(@PathVariable("id") long id, HttpSession session) throws UserException,NotFoundException,MediaException {
         userAuthorities.validateAdmin(session);
         Picture picture;
         Optional<Picture> pictureOptional = pr.findById(id);
@@ -71,15 +84,11 @@ public class ImageController {
 
         pr.delete(picture);
 
-
-        File file = new File(IMAGE_DIR + picture.getPath());
-        if(file.delete()){
-            return picture;
-        }
-        else{
-            throw new MediaException("Picture could not be deleted");
-        }
-
+//        File file = new File(picture.getPath() + ".png");
+//            if(file.delete()){
+//                throw new MediaException("Picture could not be deleted");
+//            }
+//        }
 
     }
 }

@@ -26,6 +26,8 @@ import static ittalents.webappsports.util.userAuthorities.verifiedAcc;
 
 @RestController
 public class UserController extends SportalController{
+    private static final String PASS_REGEX = "((?=.*[a-z])(?=.*d)(?=.*[@#$%!?^&*-])(?=.*[A-Z]).{6,20})";
+    private static final String EMAIL_REGEX = "^([\\w-\\.]+){1,64}@([\\w&&[^_]]+){2,255}.[a-z]{2,}$";
 
     private static final String VERIFICATION_URL = "http://localhost:8080/confirm-account-code=";
 
@@ -60,19 +62,30 @@ public class UserController extends SportalController{
 
     //verify if user entered everything correct
     private void verifyGivenData(User user) throws BadRequestException {
-        if(user.getAge() < 1){
-            throw new BadRequestException("Age cannot be negative number");
+        if(user.getAge() < 1 || user.getAge() > 120){
+            throw new BadRequestException("Enter correct age");
         }
         if(user.getEmail() == null){
             throw new BadRequestException("You need to enter an email");
         }
+        if(!user.getEmail().matches(EMAIL_REGEX)){
+            throw new BadRequestException("enter a valid email address");
+        }
         if(user.getPassword() == null){
             throw new BadRequestException("You need to enter a password");
+        }
+        if(!user.getPassword().matches(PASS_REGEX)) {
+            throw new BadRequestException("password must be at least 6 characters long," +
+                    " have at least one digit," +
+                    " a lower case letter ," +
+                    "an upper case letter and a special character");
         }
         if(user.getUsername() == null){
             throw new BadRequestException("You need to input username");
         }
-        //gender verification
+        if(!user.getPassword().equals(user.getConfirmPassword())){
+            throw new BadRequestException("passwords do not match");
+        }
     }
     private void sendVerificationEmail(User user, ConfirmationToken confirmationToken){
         new Thread(() -> {

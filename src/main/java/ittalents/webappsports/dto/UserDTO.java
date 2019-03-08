@@ -22,7 +22,6 @@ public class UserDTO {
     private String email;
     private int age;
     private List<Comment> comments;
-    private User.Gender gender;
     private boolean isConfirmed;
 
     public UserDTO convertToDTO(User user){
@@ -32,7 +31,6 @@ public class UserDTO {
         this.email = user.getEmail();
         this.comments = user.getComments();
         this.age = user.getAge();
-        this.gender = user.getGender();
         this.isConfirmed = user.isConfirmed();
         return this;
     }

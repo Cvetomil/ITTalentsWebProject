@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.Optional;
@@ -26,10 +27,14 @@ public class VideoController extends SportalController{
 
     private static final String VIDEO_DIR = "D:\\videos\\";
 
-    //upload video to database and save to hard drive
+    //upload video to database and save to server
     @PostMapping("/videos/upload/{artId}")
-    public void uploadVideo(@RequestParam("video") MultipartFile file,@PathVariable long artId, HttpSession session) throws UserException, IOException {
+    public Video uploadVideo(@RequestParam("video") MultipartFile file,@PathVariable long artId, HttpSession session) throws UserException, IOException, BadRequestException {
         userAuthorities.validateAdmin(session);
+
+        checkArticlePresence(artId);
+
+        validateArticleAuthor(session,artId);
 
         String videoName = System.currentTimeMillis() + ar.getOne(artId).getTitle();
 
@@ -43,26 +48,28 @@ public class VideoController extends SportalController{
         File newImage = new File(VIDEO_DIR + videoName + ".mpg");
         FileOutputStream fos = new FileOutputStream(newImage);
         fos.write(bytes);
+
+        return video;
     }
 
-    //delete a video from database and from hard drive
+    //delete video
     @DeleteMapping("/videos/delete/{id}")
-    public Video deleteVideo(@PathVariable("id") long id, HttpSession session) throws UserException, NotFoundException, MediaException {
+    public void deleteVideo(@PathVariable("id") long id, HttpSession session) throws UserException, NotFoundException {
         userAuthorities.validateAdmin(session);
 
         Video video = getVideoFromDB(id);
 
         videoRepository.delete(video);
 
-        File file = new File(video.getPath());
-        if(file.delete()){
-            return video;
-        }
-        throw new MediaException("Video could not be deleted");
+//        File file = new File(video.getPath() + ".mpg");
+//        if(file.delete()){
+//            return video;
+//        }
+//        throw new MediaException("Video could not be deleted");
     }
 
     //download video
-    @GetMapping(value = "/videos/{id}", produces = "video/mp4")
+    @GetMapping(value = "/videos/{id}", produces = "video/mpg")
     public byte[] downloadVideo(@PathVariable("id") long id) throws NotFoundException, IOException {
         Video videoFromDB = getVideoFromDB(id);
         File video = new File(videoFromDB.getPath());
