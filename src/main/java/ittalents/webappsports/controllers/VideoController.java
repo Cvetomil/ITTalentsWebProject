@@ -1,20 +1,23 @@
 package ittalents.webappsports.controllers;
 
-import ittalents.webappsports.exceptions.*;
+import ittalents.webappsports.exceptions.BadRequestException;
+import ittalents.webappsports.exceptions.NotFoundException;
+import ittalents.webappsports.exceptions.UserException;
+import ittalents.webappsports.models.Article;
+import ittalents.webappsports.models.User;
 import ittalents.webappsports.models.Video;
 import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.VideoRepository;
 import ittalents.webappsports.util.userAuthorities;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
-import javax.transaction.Transactional;
-import java.io.*;
-import java.nio.channels.FileChannel;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -30,11 +33,11 @@ public class VideoController extends SportalController{
     //upload video to database and save to server
     @PostMapping("/videos/upload/{artId}")
     public Video uploadVideo(@RequestParam("video") MultipartFile file,@PathVariable long artId, HttpSession session) throws UserException, IOException, BadRequestException {
-        userAuthorities.validateAdmin(session);
+        User admin = userAuthorities.validateAdmin(session);
 
-        checkArticlePresence(artId);
+         Article article = checkArticlePresence(artId);
 
-        validateArticleAuthor(session,artId);
+        validateArticleAuthor(admin,article);
 
         String videoName = System.currentTimeMillis() + ar.getOne(artId).getTitle();
 

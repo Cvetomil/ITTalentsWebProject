@@ -35,8 +35,7 @@ public class ArticleController extends SportalController {
     //Request article
     @GetMapping("/articles/{articleId}")
     public Article getArticleById(@PathVariable long articleId) throws BadRequestException {
-        checkArticlePresence(articleId);
-        Article article = ar.findById(articleId).get();
+        Article article = checkArticlePresence(articleId);
         article.setReadCount(article.getReadCount() + 1);
         article.setDayReads(article.getDayReads() + 1);
         ar.save(article);
@@ -45,28 +44,28 @@ public class ArticleController extends SportalController {
 
     //Add new article
     @PostMapping("/users/article")
-    public void addArticle(@RequestBody Article article, HttpSession session)
+    public Article addArticle(@RequestBody Article article, HttpSession session)
             throws NotAdminException, UserNotLoggedException, BadRequestException {
-        userAuthorities.validateAdmin(session);
+        User admin = userAuthorities.validateAdmin(session);
         if (!cr.findById(article.getCatId()).isPresent()) {
             throw new BadRequestException("The category does not exist!");
         }
         if (ar.findByTitle(article.getTitle()) != null) {
             throw new BadRequestException("An article with this title already exists!");
         }
-        User admin = getUser(session);
         article.setAuthor(admin.getUsername());
         ar.save(article);
+        return article;
     }
 
     //Edit existing article
     @PutMapping("/users/articles/{articleId}")
-    public Article editArticle(@RequestBody EditedArticleDTO articleDTO, HttpSession session, @PathVariable long articleId)
+    public Article editArticle(@RequestBody EditedArticleDTO articleDTO, HttpSession session,
+                               @PathVariable long articleId)
             throws NotAdminException, UserNotLoggedException, BadRequestException {
-        userAuthorities.validateAdmin(session);
-        checkArticlePresence(articleId);
-        validateArticleAuthor(session, articleId);
-        Article articleToBeEdited = ar.getOne(articleId);
+        User admin = userAuthorities.validateAdmin(session);
+        Article articleToBeEdited = checkArticlePresence(articleId);
+        validateArticleAuthor(admin, articleToBeEdited);
         if (ar.findByTitle(articleDTO.getTitle()) != null) {
             throw new BadRequestException("Article with this title already exists!");
         }
@@ -82,24 +81,21 @@ public class ArticleController extends SportalController {
     @DeleteMapping("/users/articles/{articleId}")
     public void deleteArticle(HttpSession session, @PathVariable long articleId)
             throws NotAdminException, UserNotLoggedException, BadRequestException {
-        userAuthorities.validateAdmin(session);
-        checkArticlePresence(articleId);
-        validateArticleAuthor(session, articleId);
-        ar.delete(ar.findById(articleId).get());
+        User admin = userAuthorities.validateAdmin(session);
+        Article article = checkArticlePresence(articleId);
+        validateArticleAuthor(admin, article);
+        ar.delete(article);
     }
 
     @GetMapping("/search/{title}")
     public Collection<Article> findArticlesByNameOrCategory(@PathVariable String title) {
-
         List<Article> fromArticles = ar.findAllByTitleContaining(title);
         List<Category> fromCategories = cr.getAllByNameContaining(title);
-
         Set<Article> foundArticles = new HashSet<>();
         foundArticles.addAll(fromArticles);
         fromCategories.forEach(category -> {
             foundArticles.addAll(category.getArticles());
         });
-
         return foundArticles;
     }
 

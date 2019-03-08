@@ -1,8 +1,13 @@
 package ittalents.webappsports.controllers;
 
 import ittalents.webappsports.dto.ImageUploadDTO;
-import ittalents.webappsports.exceptions.*;
+import ittalents.webappsports.exceptions.BadRequestException;
+import ittalents.webappsports.exceptions.MediaException;
+import ittalents.webappsports.exceptions.NotFoundException;
+import ittalents.webappsports.exceptions.UserException;
+import ittalents.webappsports.models.Article;
 import ittalents.webappsports.models.Picture;
+import ittalents.webappsports.models.User;
 import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.PictureRepository;
 import ittalents.webappsports.util.userAuthorities;
@@ -32,23 +37,27 @@ public class ImageController extends SportalController{
     @PostMapping("/images/upload/{artId}")
     public Picture uploadImage(@RequestBody ImageUploadDTO dto, @PathVariable long artId, HttpSession session) throws IOException,BadRequestException, UserException {
 
-        userAuthorities.validateAdmin(session);
+        User admin = userAuthorities.validateAdmin(session);
 
-        checkArticlePresence(artId);
+        Article article = checkArticlePresence(artId);
 
-        validateArticleAuthor(session,artId);
+        validateArticleAuthor(admin, article);
 
         String imgPath = System.currentTimeMillis() + ar.getOne(artId).getTitle();
 
         Picture picture = new Picture();
+
         picture.setPath(IMAGE_DIR + imgPath);
+
         picture.setArtId(artId);
         pr.save(picture);
 
         String base64 = dto.getFileStr();
                 byte[] bytes = Base64.getDecoder().decode(base64);
 
+
         File newImage = new File(IMAGE_DIR + imgPath + ".png");
+
         FileOutputStream fos = new FileOutputStream(newImage);
         fos.write(bytes);
         return picture;

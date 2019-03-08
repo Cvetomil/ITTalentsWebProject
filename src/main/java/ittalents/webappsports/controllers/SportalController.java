@@ -43,6 +43,7 @@ public class SportalController {
     }
 
     @ExceptionHandler({NotAdminException.class})
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     public String handleNotAdminException() {
         log.error("User not admin exception");
         return "You are not admin!";
@@ -104,10 +105,9 @@ public class SportalController {
         return article.get();
     }
 
-    public void validateArticleAuthor(HttpSession session, long articleId)
+    public void validateArticleAuthor(User admin, Article article)
             throws BadRequestException {
-        User admin = getUser(session);
-        if (!ar.getOne(articleId).getAuthor().equals(admin.getUsername())) {
+                if (!admin.getUsername().equals(article.getAuthor())) {
             throw new BadRequestException("You are not the author of this article!");
         }
     }
