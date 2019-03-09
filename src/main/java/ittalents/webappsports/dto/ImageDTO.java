@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 @Component
-public class ImageUploadDTO {
+public class ImageDTO {
 
     private String fileStr;
 }

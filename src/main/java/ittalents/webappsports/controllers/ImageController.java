@@ -1,8 +1,7 @@
 package ittalents.webappsports.controllers;
 
-import ittalents.webappsports.dto.ImageUploadDTO;
+import ittalents.webappsports.dto.ImageDTO;
 import ittalents.webappsports.exceptions.BadRequestException;
-import ittalents.webappsports.exceptions.MediaException;
 import ittalents.webappsports.exceptions.NotFoundException;
 import ittalents.webappsports.exceptions.UserException;
 import ittalents.webappsports.models.Article;
@@ -10,8 +9,10 @@ import ittalents.webappsports.models.Picture;
 import ittalents.webappsports.models.User;
 import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.PictureRepository;
+import ittalents.webappsports.util.MsgResponse;
 import ittalents.webappsports.util.userAuthorities;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
@@ -35,7 +36,7 @@ public class ImageController extends SportalController{
 
     //upload image to database and save to server
     @PostMapping("/images/upload/{artId}")
-    public Picture uploadImage(@RequestBody ImageUploadDTO dto, @PathVariable long artId, HttpSession session) throws IOException,BadRequestException, UserException {
+    public Picture uploadImage(@RequestBody ImageDTO dto, @PathVariable long artId, HttpSession session) throws IOException,BadRequestException, UserException {
 
         User admin = userAuthorities.validateAdmin(session);
 
@@ -80,9 +81,8 @@ public class ImageController extends SportalController{
 
 
     //delete picture
-    @Transactional
     @DeleteMapping("/image/{id}")
-    public void deletePicture(@PathVariable("id") long id, HttpSession session) throws UserException,NotFoundException,MediaException {
+    public MsgResponse deletePicture(@PathVariable("id") long id, HttpSession session) throws UserException,NotFoundException {
         userAuthorities.validateAdmin(session);
         Picture picture;
         Optional<Picture> pictureOptional = pr.findById(id);
@@ -92,6 +92,7 @@ public class ImageController extends SportalController{
         picture = pictureOptional.get();
 
         pr.delete(picture);
+        return new MsgResponse(HttpStatus.OK.value(),"image deleted successfully");
 
 //        File file = new File(picture.getPath() + ".png");
 //            if(file.delete()){

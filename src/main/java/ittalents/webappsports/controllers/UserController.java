@@ -8,8 +8,10 @@ import ittalents.webappsports.models.User;
 import ittalents.webappsports.repositories.ConfirmationTokenRep;
 import ittalents.webappsports.repositories.UserRepository;
 import ittalents.webappsports.util.EmailSender;
+import ittalents.webappsports.util.MsgResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +28,10 @@ import static ittalents.webappsports.util.userAuthorities.verifiedAcc;
 
 @RestController
 public class UserController extends SportalController{
-    private static final String PASS_REGEX = "((?=.*[a-z])(?=.*d)(?=.*[@#$%!?^&*-])(?=.*[A-Z]).{6,20})";
-    private static final String EMAIL_REGEX = "^([\\w-\\.]+){1,64}@([\\w&&[^_]]+){2,255}.[a-z]{2,}$";
+    private static final String PASS_REGEX = "((?=.*[a-z])(?=.*d)(?=.*[@#$%!?^&*-_])(?=.*[A-Z]).{6,20})";
+    private static final String EMAIL_REGEX =
+            "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9]" +
+            "(?:[a-z0-9-]*[a-z0-9])?.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
 
     private static final String VERIFICATION_URL = "http://localhost:8080/confirm-account-code=";
 
@@ -48,6 +52,7 @@ public class UserController extends SportalController{
     @PostMapping("/register")
     public UserDTO registerUser(@RequestBody User user) throws UserException, BadRequestException {
         verifyGivenData(user);
+        verifyPassword(user.getPassword());
         emailExist(user.getEmail());
         usernameExist(user.getUsername());
         user.setPassword(encoder.encode(user.getPassword()));
@@ -74,17 +79,19 @@ public class UserController extends SportalController{
         if(user.getPassword() == null){
             throw new BadRequestException("You need to enter a password");
         }
-        if(!user.getPassword().matches(PASS_REGEX)) {
-            throw new BadRequestException("password must be at least 6 characters long," +
-                    " have at least one digit," +
-                    " a lower case letter ," +
-                    "an upper case letter and a special character");
-        }
         if(user.getUsername() == null){
             throw new BadRequestException("You need to input username");
         }
         if(!user.getPassword().equals(user.getConfirmPassword())){
             throw new BadRequestException("passwords do not match");
+        }
+    }
+    public void verifyPassword(String password) throws BadRequestException {
+        if(!password.matches(PASS_REGEX)) {
+            throw new BadRequestException("password must be at least 6 characters long," +
+                    " have at least one digit," +
+                    " a lower case letter ," +
+                    "an upper case letter and a special character");
         }
     }
     private void sendVerificationEmail(User user, ConfirmationToken confirmationToken){
@@ -155,14 +162,16 @@ public class UserController extends SportalController{
 
     //logout from session
     @PostMapping("/logout")
-    public void logout(HttpSession session){
+    public MsgResponse logout(HttpSession session){
         session.invalidate();
+        return new MsgResponse(HttpStatus.OK.value(),"logout successful");
     }
 
     //edit password on logged user
     @PutMapping("/user/edit/password")
-    public UserDTO changePassword(@RequestBody User user, HttpSession session) throws UserException, SQLException,NotFoundException {
+    public UserDTO changePassword(@RequestBody User user, HttpSession session) throws UserException , NotFoundException, BadRequestException {
         User userFromDB = getUserFromSession(session);
+        verifyPassword(user.getPassword());
         userFromDB.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(userFromDB);
         return new UserDTO().convertToDTO(userFromDB);

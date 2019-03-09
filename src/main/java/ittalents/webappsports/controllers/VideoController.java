@@ -8,8 +8,10 @@ import ittalents.webappsports.models.User;
 import ittalents.webappsports.models.Video;
 import ittalents.webappsports.repositories.ArticleRepository;
 import ittalents.webappsports.repositories.VideoRepository;
+import ittalents.webappsports.util.MsgResponse;
 import ittalents.webappsports.util.userAuthorities;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,12 +59,14 @@ public class VideoController extends SportalController{
 
     //delete video
     @DeleteMapping("/videos/delete/{id}")
-    public void deleteVideo(@PathVariable("id") long id, HttpSession session) throws UserException, NotFoundException {
+    public MsgResponse deleteVideo(@PathVariable("id") long id, HttpSession session) throws UserException, NotFoundException {
         userAuthorities.validateAdmin(session);
 
         Video video = getVideoFromDB(id);
 
         videoRepository.delete(video);
+
+        return new MsgResponse(HttpStatus.OK.value(), "video deleted successfully");
 
 //        File file = new File(video.getPath() + ".mpg");
 //        if(file.delete()){
