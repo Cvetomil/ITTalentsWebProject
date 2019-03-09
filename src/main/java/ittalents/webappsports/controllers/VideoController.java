@@ -30,36 +30,34 @@ public class VideoController extends SportalController{
     @Autowired
     ArticleRepository ar;
 
-    private static final String VIDEO_DIR = "D:\\videos\\";
+    private static final String VIDEO_DIR = "C:\\Users\\aleks\\Pictures\\Upload\\";
 
     //upload video to database and save to server
     @PostMapping("/videos/upload/{artId}")
-    public Video uploadVideo(@RequestParam("video") MultipartFile file,@PathVariable long artId, HttpSession session) throws UserException, IOException, BadRequestException {
+    public Video uploadVideo(@RequestParam("video") MultipartFile file,@PathVariable long artId, HttpSession session)
+            throws UserException, IOException, BadRequestException {
         User admin = userAuthorities.validateAdmin(session);
-
         Article article = checkArticlePresence(artId);
-
         validateArticleAuthor(admin,article);
-
-        String videoName = System.currentTimeMillis() + ar.getOne(artId).getTitle();
+        String videoName = System.currentTimeMillis() + article.getTitle();
 
         byte[] bytes = file.getBytes();
         Video video = new Video();
         video.setArtId(artId);
         video.setPath(VIDEO_DIR + videoName);
-
         videoRepository.save(video);
 
-        File newImage = new File(VIDEO_DIR + videoName + ".mpg");
-        FileOutputStream fos = new FileOutputStream(newImage);
+        File newVideo = new File(VIDEO_DIR + videoName + ".mpg");
+        FileOutputStream fos = new FileOutputStream(newVideo);
         fos.write(bytes);
-
+        fos.close();
         return video;
     }
 
     //delete video
     @DeleteMapping("/videos/delete/{id}")
-    public MsgResponse deleteVideo(@PathVariable("id") long id, HttpSession session) throws UserException, NotFoundException {
+    public MsgResponse deleteVideo(@PathVariable("id") long id, HttpSession session)
+            throws UserException, NotFoundException {
         userAuthorities.validateAdmin(session);
 
         Video video = getVideoFromDB(id);

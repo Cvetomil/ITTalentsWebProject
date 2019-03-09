@@ -2,6 +2,7 @@ package ittalents.webappsports.controllers;
 
 import ittalents.webappsports.dto.ImageDTO;
 import ittalents.webappsports.exceptions.BadRequestException;
+import ittalents.webappsports.exceptions.MediaException;
 import ittalents.webappsports.exceptions.NotFoundException;
 import ittalents.webappsports.exceptions.UserException;
 import ittalents.webappsports.models.Article;
@@ -16,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,51 +25,43 @@ import java.util.Base64;
 import java.util.Optional;
 
 @RestController
-public class ImageController extends SportalController{
+public class ImageController extends SportalController {
 
     @Autowired
     ArticleRepository ar;
     @Autowired
     PictureRepository pr;
 
-    private static final String IMAGE_DIR = "D:\\images\\";
+    private static final String IMAGE_DIR = "C:\\Users\\aleks\\Pictures\\Upload\\";
 
     //upload image to database and save to server
     @PostMapping("/images/upload/{artId}")
-    public Picture uploadImage(@RequestBody ImageDTO dto, @PathVariable long artId, HttpSession session) throws IOException,BadRequestException, UserException {
-
+    public Picture uploadImage(@RequestBody ImageDTO dto, @PathVariable long artId, HttpSession session)
+            throws IOException, BadRequestException, UserException {
         User admin = userAuthorities.validateAdmin(session);
-
         Article article = checkArticlePresence(artId);
-
         validateArticleAuthor(admin, article);
-
-        String imgPath = System.currentTimeMillis() + ar.getOne(artId).getTitle();
-
+        String imgPath = article.getTitle() + System.currentTimeMillis();
         Picture picture = new Picture();
-
         picture.setPath(IMAGE_DIR + imgPath);
-
         picture.setArtId(artId);
         pr.save(picture);
 
         String base64 = dto.getFileStr();
-                byte[] bytes = Base64.getDecoder().decode(base64);
-
-
+        byte[] bytes = Base64.getDecoder().decode(base64);
         File newImage = new File(IMAGE_DIR + imgPath + ".png");
-
         FileOutputStream fos = new FileOutputStream(newImage);
         fos.write(bytes);
+        fos.close();
         return picture;
     }
 
     //download image
-    @GetMapping(value="/images/{id}", produces = "image/png")
+    @GetMapping(value = "/images/{id}", produces = "image/png")
     public byte[] getImage(@PathVariable("id") long pictureId) throws IOException, NotFoundException {
         Optional<Picture> pictureOptional = pr.findById(pictureId);
         Picture pic;
-        if(!pictureOptional.isPresent()){
+        if (!pictureOptional.isPresent()) {
             throw new NotFoundException("Picture does not exist");
         }
         pic = pictureOptional.get();
@@ -81,24 +73,23 @@ public class ImageController extends SportalController{
 
 
     //delete picture
-    @DeleteMapping("/image/{id}")
-    public MsgResponse deletePicture(@PathVariable("id") long id, HttpSession session) throws UserException,NotFoundException {
-        userAuthorities.validateAdmin(session);
+    @DeleteMapping("/images/{pictureId}")
+    public MsgResponse deletePicture(@PathVariable("pictureId") long id, HttpSession session)
+            throws UserException, NotFoundException, MediaException, BadRequestException {
+        User admin = userAuthorities.validateAdmin(session);
         Picture picture;
         Optional<Picture> pictureOptional = pr.findById(id);
-        if(!pictureOptional.isPresent()){
+        if (!pictureOptional.isPresent()) {
             throw new NotFoundException("Picture not found");
         }
         picture = pictureOptional.get();
-
-        pr.delete(picture);
-        return new MsgResponse(HttpStatus.OK.value(),"image deleted successfully");
-
-//        File file = new File(picture.getPath() + ".png");
-//            if(file.delete()){
-//                throw new MediaException("Picture could not be deleted");
-//            }
-//        }
-
+        Article article = checkArticlePresence(picture.getArtId());
+        validateArticleAuthor(admin, article);
+        File file = new File(picture.getPath() + ".png");
+        if (file.delete()) {
+            pr.delete(picture);
+            return new MsgResponse(HttpStatus.OK.value(), "image deleted successfully");
+        }
+        throw new MediaException("Image cannot be deleted!");
     }
 }
