@@ -10,10 +10,11 @@ import javax.servlet.http.HttpSession;
 
 
 public class userAuthorities extends SportalController {
-    public static void validateUser(HttpSession session) throws UserNotLoggedException {
+    public static User validateUser(HttpSession session) throws UserNotLoggedException {
         if (session.getAttribute("Logged") == null) {
             throw new UserNotLoggedException("User not logged");
         }
+        return (User)session.getAttribute("Logged");
     }
 
     public static User validateAdmin(HttpSession session) throws UserNotLoggedException, NotAdminException {
