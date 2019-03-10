@@ -38,6 +38,7 @@ public class Article {
     @OnDelete(action = OnDeleteAction.CASCADE)
         private List<Picture> pictures;
     @OneToMany(mappedBy = "artId", cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Video> videos;
 
 }

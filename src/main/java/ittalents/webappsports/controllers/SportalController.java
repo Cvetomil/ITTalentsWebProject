@@ -1,6 +1,7 @@
 package ittalents.webappsports.controllers;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import ittalents.webappsports.exceptions.*;
 import ittalents.webappsports.models.Article;
 import ittalents.webappsports.models.Comment;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartException;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
+import java.io.FileNotFoundException;
 import java.util.Optional;
 
 @ControllerAdvice
@@ -83,10 +85,10 @@ public class SportalController {
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler({NotFoundException.class})
-    public MsgResponse handleNotFoundException(NotFoundException e) {
+    @ExceptionHandler({NotFoundException.class, FileNotFoundException.class})
+    public MsgResponse handleNotFoundException(Exception e) {
         log.error(e.getMessage());
-        return new MsgResponse(HttpStatus.NOT_FOUND.value(),e.getMessage());
+        return new MsgResponse(HttpStatus.NOT_FOUND.value(),"File not found");
     }
 
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
@@ -98,7 +100,8 @@ public class SportalController {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({BadRequestException.class, NumberFormatException.class,
-            InvalidFormatException.class, HttpMediaTypeNotSupportedException.class})
+            InvalidFormatException.class,
+            HttpMediaTypeNotSupportedException.class, MismatchedInputException.class})
     public MsgResponse handleBadRequestsExceptions(Exception e) {
         log.error(e.getMessage());
         return new MsgResponse(HttpStatus.BAD_REQUEST.value(),e.getMessage());

@@ -17,10 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -58,17 +55,18 @@ public class ImageController extends SportalController {
 
     //download image
     @GetMapping(value = "/images/{id}", produces = "image/png")
-    public byte[] getImage(@PathVariable("id") long pictureId) throws IOException, NotFoundException {
+    public byte[] getImage(@PathVariable("id") long pictureId)
+            throws IOException, NotFoundException {
         Optional<Picture> pictureOptional = pr.findById(pictureId);
         Picture pic;
         if (!pictureOptional.isPresent()) {
-            throw new NotFoundException("Picture does not exist");
+            throw new NotFoundException("File not found");
         }
         pic = pictureOptional.get();
-
-        File newImage = new File(pic.getPath());
-        FileInputStream fis = new FileInputStream(newImage + ".png");
-        return fis.readAllBytes();
+        FileInputStream fis = new FileInputStream(new File(pic.getPath() + ".png"));
+        byte[] image = fis.readAllBytes();
+        fis.close();
+        return image;
     }
 
 
@@ -80,7 +78,7 @@ public class ImageController extends SportalController {
         Picture picture;
         Optional<Picture> pictureOptional = pr.findById(id);
         if (!pictureOptional.isPresent()) {
-            throw new NotFoundException("Picture not found");
+            throw new NotFoundException("File not found");
         }
         picture = pictureOptional.get();
         Article article = checkArticlePresence(picture.getArtId());

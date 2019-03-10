@@ -1,6 +1,7 @@
 package ittalents.webappsports.controllers;
 
 import ittalents.webappsports.exceptions.BadRequestException;
+import ittalents.webappsports.exceptions.MediaException;
 import ittalents.webappsports.exceptions.NotFoundException;
 import ittalents.webappsports.exceptions.UserException;
 import ittalents.webappsports.models.Article;
@@ -23,7 +24,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @RestController
-public class VideoController extends SportalController{
+public class VideoController extends SportalController {
     @Autowired
     VideoRepository videoRepository;
 
@@ -34,11 +35,11 @@ public class VideoController extends SportalController{
 
     //upload video to database and save to server
     @PostMapping("/videos/upload/{artId}")
-    public Video uploadVideo(@RequestParam("video") MultipartFile file,@PathVariable long artId, HttpSession session)
+    public Video uploadVideo(@RequestParam("video") MultipartFile file, @PathVariable long artId, HttpSession session)
             throws UserException, IOException, BadRequestException {
         User admin = userAuthorities.validateAdmin(session);
         Article article = checkArticlePresence(artId);
-        validateArticleAuthor(admin,article);
+        validateArticleAuthor(admin, article);
         String videoName = System.currentTimeMillis() + article.getTitle();
 
         byte[] bytes = file.getBytes();
@@ -55,37 +56,35 @@ public class VideoController extends SportalController{
     }
 
     //delete video
-    @DeleteMapping("/videos/delete/{id}")
-    public MsgResponse deleteVideo(@PathVariable("id") long id, HttpSession session)
-            throws UserException, NotFoundException {
-        userAuthorities.validateAdmin(session);
-
-        Video video = getVideoFromDB(id);
-
-        videoRepository.delete(video);
-
-        return new MsgResponse(HttpStatus.OK.value(), "video deleted successfully");
-
-//        File file = new File(video.getPath() + ".mpg");
-//        if(file.delete()){
-//            return video;
-//        }
-//        throw new MediaException("Video could not be deleted");
+    @DeleteMapping("/videos/delete/{videoId}")
+    public MsgResponse deleteVideo(@PathVariable("videoId") long videoId, HttpSession session)
+            throws UserException, NotFoundException, MediaException, BadRequestException {
+        User admin = userAuthorities.validateAdmin(session);
+        Video video = getVideoFromDB(videoId);
+        Article article = checkArticlePresence(video.getArtId());
+        validateArticleAuthor(admin, article);
+        File file = new File(video.getPath() + ".mpg");
+        if (file.delete()) {
+            videoRepository.delete(video);
+            return new MsgResponse(HttpStatus.OK.value(), "video deleted successfully");
+        }
+        throw new MediaException("Video cannot be deleted!");
     }
 
     //download video
     @GetMapping(value = "/videos/{id}", produces = "video/mpg")
     public byte[] downloadVideo(@PathVariable("id") long id) throws NotFoundException, IOException {
         Video videoFromDB = getVideoFromDB(id);
-        File video = new File(videoFromDB.getPath());
-        FileInputStream fis = new FileInputStream(video + ".mpg");
-
-        return fis.readAllBytes();
+        FileInputStream fis = new FileInputStream(new File(videoFromDB.getPath() + ".mpg"));
+        byte[] video = fis.readAllBytes();
+        fis.close();
+        return video;
     }
-    private Video getVideoFromDB(long id) throws NotFoundException{
+
+    private Video getVideoFromDB(long id) throws NotFoundException {
         Video video;
         Optional<Video> videoOptional = videoRepository.findById(id);
-        if(!videoOptional.isPresent()){
+        if (!videoOptional.isPresent()) {
             throw new NotFoundException("Video not found");
         }
         video = videoOptional.get();
