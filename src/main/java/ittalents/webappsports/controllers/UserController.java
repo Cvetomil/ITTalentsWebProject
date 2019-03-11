@@ -179,6 +179,7 @@ public class UserController extends SportalController{
     //edit username on logged user
     @PutMapping("/user/edit/username")
     public UserDTO changeUsername(@RequestBody User user, HttpSession session) throws UserException, NotFoundException {
+        usernameExist(user.getUsername());
         User userFromDB = getUserFromSession(session);
         userFromDB.setUsername(user.getUsername());
         userRepository.save(userFromDB);
